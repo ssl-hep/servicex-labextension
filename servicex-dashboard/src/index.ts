@@ -27,7 +27,6 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
   const data = await response.json();
   console.log(data);*/
 
-  /*
   let arr = [
     {
       request_id: 'c5ae836c-5e76-451f-82b4-0a0f09a76f5a',
@@ -60,10 +59,9 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
       workers: ''
     }
   ];
-  */
-
   
-
+ 
+  /*
   const response = await fetch('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation');
   const data = await response.json();
   let arr = [];
@@ -116,13 +114,15 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
       }
 
       arr.push(obj);
-  }
+  }*/
   
 
   const content = new Widget();
+  content.addClass('my-apodWidget');
   const widget = new MainAreaWidget({ content });
   widget.id = 'servicex-dashboard';
   widget.title.label = 'Basic Dashboard';
+  widget.title.closable = true;
   let table = document.createElement('table');
   let thead = document.createElement('thead');
   let tbody = document.createElement('tbody');
@@ -131,7 +131,12 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
   table.appendChild(thead);
   table.appendChild(tbody);
   table.appendChild(caption);
+  /*
+  let div = document.createElement('div');
+  div.appendChild(table);
+  content.node.appendChild(div);*/
   content.node.appendChild(table);
+
 
   let row_1 = document.createElement('tr');
   let heading_1 = document.createElement('th');
@@ -171,6 +176,25 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
   data_3.innerHTML = arr[0].finish_time;
   let data_4 = document.createElement('td');
   data_4.innerHTML = arr[0].status;
+
+  /*
+  let progress_bar = document.createElement('progress');
+  progress_bar.setAttribute("max", "100");
+  progress_bar.setAttribute("value", "0");
+  let id = setInterval(frame, 500);
+  let i = 0;
+  function frame() {
+      if (i >= 100) {
+        clearInterval(id);
+      } else {
+        i++; 
+        progress_bar.value = i; 
+      }
+    data_4.appendChild(progress_bar);
+
+  }*/
+  
+
   let data_5 = document.createElement('td');
   data_5.innerHTML = arr[0].files_completed;
   let data_6 = document.createElement('td');
@@ -178,6 +202,13 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
   let data_7 = document.createElement('td');
   if(arr[0].needs_action)
     data_7.innerHTML = "Cancel";
+  
+  /*  
+  let btn = document.createElement('button');
+  btn.innerHTML = 'Cancel';
+  btn.type = 'button';
+  data_7.append(btn);*/
+  
 
   row_2.appendChild(data_1);
   row_2.appendChild(data_2);
@@ -186,7 +217,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
   row_2.appendChild(data_5);
   row_2.appendChild(data_6);
   row_2.appendChild(data_7);
-  thead.appendChild(row_2);
+  tbody.appendChild(row_2);
 
   let row_3 = document.createElement('tr');
   let data_11 = document.createElement('td');
@@ -207,7 +238,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
   data_61.innerHTML = arr[1].workers;
   let data_71 = document.createElement('td');
   if(arr[1].needs_action)
-    data_7.innerHTML = "Cancel";
+    data_71.innerHTML = "Cancel";
 
   row_3.appendChild(data_11);
   row_3.appendChild(data_21);
@@ -216,7 +247,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
   row_3.appendChild(data_51);
   row_3.appendChild(data_61);
   row_3.appendChild(data_71);
-  thead.appendChild(row_3);
+  tbody.appendChild(row_3);
 
   let row_4 = document.createElement('tr');
   let data_12 = document.createElement('td');
@@ -246,7 +277,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
   row_4.appendChild(data_52);
   row_4.appendChild(data_62);
   row_4.appendChild(data_72);
-  thead.appendChild(row_4);
+  tbody.appendChild(row_4);
   
   const command = 'dashboard: open';
   app.commands.addCommand(command, {
