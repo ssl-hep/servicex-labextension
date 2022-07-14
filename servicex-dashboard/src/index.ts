@@ -20,18 +20,45 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
 export default plugin;
 
-async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
+async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Activate function for plugin
   console.log('JupyterLab extension servicex-dashboard is activated!');
 
-  async function createTable(){
-
-    /*
+  async function createTable(){ //Function that creates instance of dashboard
+    /* 1st part of code in testing polling
     const response = await fetch('./files/src/transformation.json');
     const data = await response.json();
 
-    console.log(data.requests[0].request_id);*/
+    let arr = [];
+    for(let i = 0; i < 16; i++){
+      const obj = {
+        request_id: '',
+        status: '',
+        workers: 0
+      }
+      obj.request_id = data.requests[i].request_id;
+      obj.status = data.requests[i].status;
+      obj.workers = data.requests[i].workers;
+
+      arr.push(obj);
+    }*/
+
+    if(content.node.hasChildNodes()){   //Checking if there is already an exisiting table
+      content.node.innerHTML = '';   //If it exists, it is removed
+    }
     
-    let arr = [
+    let arr = [   //Array being used for data while wating on CORS issue to be fixed
+      {
+        request_id: 'fb9e2120-d86c-4ab0-a9f4-de3d56adedcc',
+        status: 'Canceled',
+        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/fb9e2120-d86c-4ab0-a9f4-de3d56adedcc',
+        start_time: '2022-04-18 10:30:41',
+        finish_time: '2022-07-14 15:04:19',
+        files_completed: 0,
+        total_files: null,
+        files_skipped: 0,
+        needs_action: false,
+        workers: '-'
+      },
       {
         request_id: '829aa02d-f162-4971-ae2a-11a4321616ec',
         status: 'Complete',
@@ -199,29 +226,10 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
         files_skipped: 0,
         needs_action: false,
         workers: '-'
-      },
-      {
-        request_id: 'e4c7a619-1109-4b67-8d2e-4aafb9f3b0d9',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/e4c7a619-1109-4b67-8d2e-4aafb9f3b0d9',
-        start_time: '2022-07-11 09:49:06',
-        finish_time: '2022-07-11 10:31:51',
-        files_completed: 7066,
-        total_files: 7066,
-        files_skipped: 0,
-        needs_action: false,
-        workers: '-'
       }
     ];
-    
-    /*
-    if(content.node.hasChildNodes()){
-      content.node.innerHTML = '';
-      console.log('Removed old dashboard');
-    }*/
 
-    
-    let table = document.createElement('table');
+    let table = document.createElement('table');  //Creating table and various table elements
     let thead = document.createElement('thead');
     let tbody = document.createElement('tbody');
     let caption = document.createElement('caption');
@@ -229,11 +237,41 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
     table.appendChild(thead);
     table.appendChild(tbody);
     table.appendChild(caption);
-  
+
+    /* 2nd part of code in testing polling
     for(let i = -1; i < 15; i++){
       let row = document.createElement('tr');
-      let elem_1, elem_2, elem_3, elem_4, elem_5, elem_6, elem_7;
+      let elem_1, elem_2, elem_3;
       if(i == -1){
+        elem_1 = document.createElement('th');
+        elem_1.innerHTML = "Request ID";
+        row.appendChild(elem_1);
+        elem_2 = document.createElement('th');
+        elem_2.innerHTML = "Status";
+        row.appendChild(elem_2);
+        elem_3 = document.createElement('th');
+        elem_3.innerHTML = "Workers";
+        row.appendChild(elem_3);
+        thead.appendChild(row);
+      }else{
+        elem_1 = document.createElement('td');
+        elem_1.innerHTML = arr[i].request_id;
+        row.appendChild(elem_1);
+        elem_2 = document.createElement('td');
+        elem_2.innerHTML = arr[i].status;
+        row.appendChild(elem_2);
+        elem_3 = document.createElement('td');
+        elem_3.innerHTML = arr[i].workers.toString();
+        row.appendChild(elem_3);
+        tbody.appendChild(row);
+      }
+
+    }*/
+    
+    for(let i = -1; i < 15; i++){    //for loop for creating table
+      let row = document.createElement('tr');
+      let elem_1, elem_2, elem_3, elem_4, elem_5, elem_6, elem_7;
+      if(i == -1){  //For header of table (creating elements and attaching them)
         elem_1 = document.createElement('th');
         elem_1.innerHTML = "Title";
         row.appendChild(elem_1);
@@ -256,9 +294,9 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
         elem_7.innerHTML = "Actions";
         row.appendChild(elem_7);
         thead.appendChild(row);
-      }else{
+      }else{  //For the data section of the table (creating elements and attaching them)
         elem_1 = document.createElement('td');
-        let link = document.createElement('a');
+        let link = document.createElement('a'); //Creating link to transform request page
         link.setAttribute("href", arr[i].title_link);
         let linkText = document.createTextNode("Untitled");
         link.appendChild(linkText);
@@ -272,10 +310,10 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
         row.appendChild(elem_3);
         elem_4 = document.createElement('td');
         elem_4.innerHTML = arr[i].status;
-        if(arr[i].status == 'Submitted' || arr[i].status == 'Running'){
+        if(arr[i].status == 'Submitted' || arr[i].status == 'Running'){ //If status is 'submitted' or 'running', progres bar is displayed
           let total_files = arr[i].total_files;
           let completed_files = arr[i].files_completed;
-          if(total_files != null){
+          if(total_files != null){ //Null check to make sure code doesn't break
             let progress_bar = document.createElement('progress');
             progress_bar.setAttribute("max", "100");
             let percentage = (completed_files/total_files) * 100;
@@ -285,15 +323,20 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
         }
         row.appendChild(elem_4);
         elem_5 = document.createElement('td');
-        let link_1 = document.createElement('a');
+        let link_1 = document.createElement('a'); //Adding link to log of successful files
         link_1.style.fontWeight = 'normal';
         link_1.setAttribute("href", 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/' + arr[i].request_id + '/results?status=success');
         let linkText1 = document.createTextNode(arr[i].files_completed.toString());
         link_1.appendChild(linkText1);
         elem_5.appendChild(link_1);
-        let text = document.createTextNode(' of ' + arr[i].total_files.toString());
+        let text;
+        if(arr[i].total_files !=  null){ //Null check to make sure code doesn't break
+          text = document.createTextNode(' of ' + arr[i].total_files);
+        }else{
+          text = document.createTextNode(' of Unknown');
+        }
         elem_5.appendChild(text);
-        if(arr[i].files_skipped != 0){
+        if(arr[i].files_skipped != 0){  //Adding link to log of failed files (if there are skipped files)
           let text_1 = document.createTextNode('\n  (');
           elem_5.appendChild(text_1);
           let link_2 = document.createElement('a');
@@ -310,7 +353,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
         elem_6.innerHTML = arr[i].workers;
         row.appendChild(elem_6);
         elem_7 = document.createElement('td');
-        if(arr[i].needs_action){
+        if(arr[i].needs_action){ //If status is 'submitted' or 'running', button is displayed to cancel the request (Work In Progress)
           let btn = document.createElement('button');
           btn.innerHTML = 'Cancel';
           btn.type = 'button';
@@ -320,86 +363,87 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
         tbody.append(row);
       }
     }
-    //console.log(arr[arr.length-1].start_time);
-    content.node.appendChild(table);
-  }
+    content.node.appendChild(table); //Appends newly created table to widget
+
+    //setTimeout(createTable, 5000); //Call for polling inside createTable()
  
-  /*
-  const response = await fetch('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation');
-  const data = await response.json();
-  let arr = [];
+    /* Code for retrieving live json result (Not operational while CORS issue still exists)
+    const response = await fetch('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation');
+    const data = await response.json();
+    let arr = [];
 
-  for(let i = data.requests.length - 1; i > data.requests.length - 16; i--){
-      const obj = {
-        request_id: '',
-        status: '',
-        title_link: '',
-        start_time: '',
-        finish_time: '',
-        files_completed: 0,
-        total_files: 0,
-        needs_action: false,
-        workers: ''
-      };
+    for(let i = data.requests.length - 1; i > data.requests.length - 16; i--){
+        const obj = {
+          request_id: '',
+          status: '',
+          title_link: '',
+          start_time: '',
+          finish_time: '',
+          files_completed: 0,
+          total_files: 0,
+          needs_action: false,
+          workers: ''
+        };
 
-      let request_id = data.requests[i]['request_id'];
-      obj['request_id'] = request_id;
-      let status = data.requests[i]['status'];
-      obj['status'] = status;
-      obj['title_link'] = 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/' + request_id;
+        let request_id = data.requests[i]['request_id'];
+        obj['request_id'] = request_id;
+        let status = data.requests[i]['status'];
+        obj['status'] = status;
+        obj['title_link'] = 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/' + request_id;
 
-      const response1 = await fetch('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation/' + request_id + '/status');
-      const data1 = await response1.json();
+        const response1 = await fetch('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation/' + request_id + '/status');
+        const data1 = await response1.json();
 
-      let start_time = data1['submit-time'];
-      start_time = start_time.replace("T", " ");
-      start_time = start_time.slice(0,19);
-      let finish_time = data1['finish-time'];
-      if(finish_time != null){
-          finish_time = finish_time.replace("T", " ");
-          finish_time = finish_time.slice(0, 19);
-      }else{
-          finish_time = '-';
-      }
-      obj['start_time'] = start_time;
-      obj['finish_time'] = finish_time;
+        let start_time = data1['submit-time'];
+        start_time = start_time.replace("T", " ");
+        start_time = start_time.slice(0,19);
+        let finish_time = data1['finish-time'];
+        if(finish_time != null){
+            finish_time = finish_time.replace("T", " ");
+            finish_time = finish_time.slice(0, 19);
+        }else{
+            finish_time = '-';
+        }
+        obj['start_time'] = start_time;
+        obj['finish_time'] = finish_time;
 
-      let files_processed = data1["files-processed"];
-      let files_remaining = data1["files-remaining"];
-      let files_skipped = data1["files-skipped"];
-      let total_files;
-      if (files_remaining == null) {
-          total_files = null;
-      }else{
-          total_files = files_processed + files_skipped + files_remaining;
-      }
-      obj['files_completed'] = files_processed;
-      obj['total_files'] = total_files;
-      obj['files_skipped'] = files_skipped; 
+        let files_processed = data1["files-processed"];
+        let files_remaining = data1["files-remaining"];
+        let files_skipped = data1["files-skipped"];
+        let total_files;
+        if (files_remaining == null) {
+            total_files = null;
+        }else{
+            total_files = files_processed + files_skipped + files_remaining;
+        }
+        obj['files_completed'] = files_processed;
+        obj['total_files'] = total_files;
+        obj['files_skipped'] = files_skipped; 
 
-      let workers = data.requests[i]['workers'];
-      if(status == 'Complete' || status == 'Canceled' || status == 'Fatal'){
-          obj['needs_action'] = false;
-          obj['workers'] = '-';
-      }else{
-          obj['needs_action'] = true;
-          obj['workers'] = workers.toString();
-      }
+        let workers = data.requests[i]['workers'];
+        if(status == 'Complete' || status == 'Canceled' || status == 'Fatal'){
+            obj['needs_action'] = false;
+            obj['workers'] = '-';
+        }else{
+            obj['needs_action'] = true;
+            obj['workers'] = workers.toString();
+        }
 
-      arr.push(obj);
-  }*/
+        arr.push(obj);
+    }*/
 
-  const content = new Widget();
+  }
+
+  const content = new Widget(); //Creating widget and adding scrolling capabilites to it
   content.addClass('my-apodWidget');
   const widget = new MainAreaWidget({ content });
   widget.id = 'servicex-dashboard';
   widget.title.label = 'ServiceX Dashboard';
   widget.title.closable = true;
 
-  createTable();
-  //setInterval(createTable, 1000);
+  setTimeout(createTable, 5000); //Calling of setTimeout to start polling loop. 
 
-  const command = 'dashboard: open';
+  const command = 'dashboard: open'; //Command for opening dashboard through Command Line
   app.commands.addCommand(command, {
     label: 'ServiceX Dashboard',
     execute: () => {
