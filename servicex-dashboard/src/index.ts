@@ -23,6 +23,189 @@ export default plugin;
 async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Activate function for plugin
   console.log('JupyterLab extension servicex-dashboard is activated!');
 
+  let arr = [   //Array being used for data while wating on CORS issue to be fixed
+    {
+      request_id: 'fb9e2120-d86c-4ab0-a9f4-de3d56adedcc',
+      status: 'Canceled',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/fb9e2120-d86c-4ab0-a9f4-de3d56adedcc',
+      start_time: '2022-04-18 10:30:41',
+      finish_time: '2022-07-14 15:04:19',
+      files_completed: 0,
+      total_files: null,
+      files_skipped: 0,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: '829aa02d-f162-4971-ae2a-11a4321616ec',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/829aa02d-f162-4971-ae2a-11a4321616ec',
+      start_time: '2022-07-13 09:25:53',
+      finish_time: '2022-07-13 09:28:57',
+      files_completed: 0,
+      total_files: 10,
+      files_skipped: 10,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: 'a7278a25-7214-4e8f-8d67-781cca58db8d',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/a7278a25-7214-4e8f-8d67-781cca58db8d',
+      start_time: '2022-07-13 09:25:53',
+      finish_time: '2022-07-13 09:29:08',
+      files_completed: 0,
+      total_files: 10,
+      files_skipped: 10,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: 'f6b58f98-4921-4bc6-b612-a5a454a6ec3d',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/f6b58f98-4921-4bc6-b612-a5a454a6ec3d',
+      start_time: '2022-07-13 09:25:53',
+      finish_time: '2022-07-13 09:29:08',
+      files_completed: 0,
+      total_files: 10,
+      files_skipped: 10,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: '709df92c-cb39-4dbd-9a7c-117456d28e62',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/709df92c-cb39-4dbd-9a7c-117456d28e62',
+      start_time: '2022-07-13 09:25:53',
+      finish_time: '2022-07-13 09:29:09',
+      files_completed: 0,
+      total_files: 10,
+      files_skipped: 10,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: 'd14ac4e1-3bd7-4c47-9afb-aeb11024227b',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/d14ac4e1-3bd7-4c47-9afb-aeb11024227b',
+      start_time: '2022-07-13 09:25:53',
+      finish_time: '2022-07-13 09:28:52',
+      files_completed: 0,
+      total_files: 10,
+      files_skipped: 10,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: '1163c6ce-dd9e-49d1-a99a-05335b5ee539',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/1163c6ce-dd9e-49d1-a99a-05335b5ee539',
+      start_time: '2022-07-13 09:25:53',
+      finish_time: '2022-07-13 09:29:40',
+      files_completed: 0,
+      total_files: 10,
+      files_skipped: 10,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: '89c57639-6b4b-469d-b0e7-31f35c3982cd',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/89c57639-6b4b-469d-b0e7-31f35c3982cd',
+      start_time: '2022-07-13 09:25:53',
+      finish_time: '2022-07-13 09:28:51',
+      files_completed: 0,
+      total_files: 10,
+      files_skipped: 10,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: '6affcc02-2b45-476f-a7ba-0fc80464ecb2',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/6affcc02-2b45-476f-a7ba-0fc80464ecb2',
+      start_time: '2022-07-13 09:25:53',
+      finish_time: '2022-07-13 09:28:42',
+      files_completed: 0,
+      total_files: 10,
+      files_skipped: 10,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: '3f0bd291-d2b1-4b32-baea-255f1b8791dc',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/3f0bd291-d2b1-4b32-baea-255f1b8791dc',
+      start_time: '2022-07-11 09:49:04',
+      finish_time: '2022-07-11 09:56:27',
+      files_completed: 443,
+      total_files: 443,
+      files_skipped: 0,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: 'a77639bd-f1e7-418e-b705-716a0a1d1119',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/a77639bd-f1e7-418e-b705-716a0a1d1119',
+      start_time: '2022-07-11 09:49:07',
+      finish_time: '2022-07-11 09:50:38',
+      files_completed: 50,
+      total_files: 50,
+      files_skipped: 0,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: 'a0ceeeef-81e2-4f06-95e0-b78c9a58aabc',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/a0ceeeef-81e2-4f06-95e0-b78c9a58aabc',
+      start_time: '2022-07-11 09:49:04',
+      finish_time: '2022-07-11 10:01:40',
+      files_completed: 902,
+      total_files: 902,
+      files_skipped: 0,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: '74ce44e7-aefb-47fd-b176-786086a9d0d2',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/74ce44e7-aefb-47fd-b176-786086a9d0d2',
+      start_time: '2022-07-11 09:49:06',
+      finish_time: '2022-07-11 12:28:10',
+      files_completed: 9599,
+      total_files: 10199,
+      files_skipped: 600,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: '6c842358-90e1-4650-a701-4adeef931f44',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/6c842358-90e1-4650-a701-4adeef931f44',
+      start_time: '2022-07-11 09:49:04',
+      finish_time: '2022-07-11 09:58:16',
+      files_completed: 438,
+      total_files: 438,
+      files_skipped: 0,
+      needs_action: false,
+      workers: '-'
+    },
+    {
+      request_id: '93bb533d-6d20-4359-80bb-3f093432cbc4',
+      status: 'Complete',
+      title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/93bb533d-6d20-4359-80bb-3f093432cbc4',
+      start_time: '2022-07-01 11:38:20',
+      finish_time: '2022-07-01 11:39:15',
+      files_completed: 4,
+      total_files: 4,
+      files_skipped: 0,
+      needs_action: false,
+      workers: '-'
+    }
+  ];
+
   async function createTable(){ //Function that creates instance of dashboard
     /* 1st part of code in testing polling
     const response = await fetch('./files/src/transformation.json');
@@ -42,201 +225,36 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
       arr.push(obj);
     }*/
 
+    /*
     if(content.node.hasChildNodes()){   //Checking if there is already an exisiting table
       content.node.innerHTML = '';   //If it exists, it is removed
-    }
-    
-    let arr = [   //Array being used for data while wating on CORS issue to be fixed
-      {
-        request_id: 'fb9e2120-d86c-4ab0-a9f4-de3d56adedcc',
-        status: 'Canceled',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/fb9e2120-d86c-4ab0-a9f4-de3d56adedcc',
-        start_time: '2022-04-18 10:30:41',
-        finish_time: '2022-07-14 15:04:19',
-        files_completed: 0,
-        total_files: null,
-        files_skipped: 0,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: '829aa02d-f162-4971-ae2a-11a4321616ec',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/829aa02d-f162-4971-ae2a-11a4321616ec',
-        start_time: '2022-07-13 09:25:53',
-        finish_time: '2022-07-13 09:28:57',
-        files_completed: 0,
-        total_files: 10,
-        files_skipped: 10,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: 'a7278a25-7214-4e8f-8d67-781cca58db8d',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/a7278a25-7214-4e8f-8d67-781cca58db8d',
-        start_time: '2022-07-13 09:25:53',
-        finish_time: '2022-07-13 09:29:08',
-        files_completed: 0,
-        total_files: 10,
-        files_skipped: 10,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: 'f6b58f98-4921-4bc6-b612-a5a454a6ec3d',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/f6b58f98-4921-4bc6-b612-a5a454a6ec3d',
-        start_time: '2022-07-13 09:25:53',
-        finish_time: '2022-07-13 09:29:08',
-        files_completed: 0,
-        total_files: 10,
-        files_skipped: 10,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: '709df92c-cb39-4dbd-9a7c-117456d28e62',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/709df92c-cb39-4dbd-9a7c-117456d28e62',
-        start_time: '2022-07-13 09:25:53',
-        finish_time: '2022-07-13 09:29:09',
-        files_completed: 0,
-        total_files: 10,
-        files_skipped: 10,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: 'd14ac4e1-3bd7-4c47-9afb-aeb11024227b',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/d14ac4e1-3bd7-4c47-9afb-aeb11024227b',
-        start_time: '2022-07-13 09:25:53',
-        finish_time: '2022-07-13 09:28:52',
-        files_completed: 0,
-        total_files: 10,
-        files_skipped: 10,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: '1163c6ce-dd9e-49d1-a99a-05335b5ee539',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/1163c6ce-dd9e-49d1-a99a-05335b5ee539',
-        start_time: '2022-07-13 09:25:53',
-        finish_time: '2022-07-13 09:29:40',
-        files_completed: 0,
-        total_files: 10,
-        files_skipped: 10,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: '89c57639-6b4b-469d-b0e7-31f35c3982cd',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/89c57639-6b4b-469d-b0e7-31f35c3982cd',
-        start_time: '2022-07-13 09:25:53',
-        finish_time: '2022-07-13 09:28:51',
-        files_completed: 0,
-        total_files: 10,
-        files_skipped: 10,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: '6affcc02-2b45-476f-a7ba-0fc80464ecb2',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/6affcc02-2b45-476f-a7ba-0fc80464ecb2',
-        start_time: '2022-07-13 09:25:53',
-        finish_time: '2022-07-13 09:28:42',
-        files_completed: 0,
-        total_files: 10,
-        files_skipped: 10,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: '3f0bd291-d2b1-4b32-baea-255f1b8791dc',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/3f0bd291-d2b1-4b32-baea-255f1b8791dc',
-        start_time: '2022-07-11 09:49:04',
-        finish_time: '2022-07-11 09:56:27',
-        files_completed: 443,
-        total_files: 443,
-        files_skipped: 0,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: 'a77639bd-f1e7-418e-b705-716a0a1d1119',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/a77639bd-f1e7-418e-b705-716a0a1d1119',
-        start_time: '2022-07-11 09:49:07',
-        finish_time: '2022-07-11 09:50:38',
-        files_completed: 50,
-        total_files: 50,
-        files_skipped: 0,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: 'a0ceeeef-81e2-4f06-95e0-b78c9a58aabc',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/a0ceeeef-81e2-4f06-95e0-b78c9a58aabc',
-        start_time: '2022-07-11 09:49:04',
-        finish_time: '2022-07-11 10:01:40',
-        files_completed: 902,
-        total_files: 902,
-        files_skipped: 0,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: '74ce44e7-aefb-47fd-b176-786086a9d0d2',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/74ce44e7-aefb-47fd-b176-786086a9d0d2',
-        start_time: '2022-07-11 09:49:06',
-        finish_time: '2022-07-11 12:28:10',
-        files_completed: 9599,
-        total_files: 10199,
-        files_skipped: 600,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: '6c842358-90e1-4650-a701-4adeef931f44',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/6c842358-90e1-4650-a701-4adeef931f44',
-        start_time: '2022-07-11 09:49:04',
-        finish_time: '2022-07-11 09:58:16',
-        files_completed: 438,
-        total_files: 438,
-        files_skipped: 0,
-        needs_action: false,
-        workers: '-'
-      },
-      {
-        request_id: '93bb533d-6d20-4359-80bb-3f093432cbc4',
-        status: 'Complete',
-        title_link: 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/93bb533d-6d20-4359-80bb-3f093432cbc4',
-        start_time: '2022-07-01 11:38:20',
-        finish_time: '2022-07-01 11:39:15',
-        files_completed: 4,
-        total_files: 4,
-        files_skipped: 0,
-        needs_action: false,
-        workers: '-'
-      }
-    ];
+    }*/
 
     let table = document.createElement('table');  //Creating table and various table elements
     let thead = document.createElement('thead');
     let tbody = document.createElement('tbody');
-    let caption = document.createElement('caption');
-    caption.innerHTML = "Transformation Requests";
+
+    let div = document.createElement('div');
+    let h4 = document.createElement('h4');
+    h4.textContent = 'Transformation Requests';
+    div.appendChild(h4);
+
+    div.style.backgroundColor = 'white';
+    div.style.padding = '7.5px 15px';
+    div.style.margin = '0px';
+    div.style.width = '700px'
+
+    //let caption = document.createElement('caption');
+    //caption.innerHTML = "Transformation Requests";
+    //let footer = document.createElement('footer');
+    //footer.innerHTML = "All times in UTC.";
     table.appendChild(thead);
     table.appendChild(tbody);
-    table.appendChild(caption);
+    //table.appendChild(caption);
+    //table.appendChild(footer);
+
+    div.appendChild(table);
+    content.node.appendChild(div); //Appends newly created table to widget
 
     /* 2nd part of code in testing polling
     for(let i = -1; i < 15; i++){
@@ -363,7 +381,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         tbody.append(row);
       }
     }
-    content.node.appendChild(table); //Appends newly created table to widget
+      
 
     //setTimeout(createTable, 5000); //Call for polling inside createTable()
  
@@ -372,7 +390,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     const data = await response.json();
     let arr = [];
 
-    for(let i = data.requests.length - 1; i > data.requests.length - 16; i--){
+    for(let i = data.requests.length - 1; i > -1; i--){
         const obj = {
           request_id: '',
           status: '',
@@ -441,7 +459,8 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
   widget.title.label = 'ServiceX Dashboard';
   widget.title.closable = true;
 
-  setTimeout(createTable, 5000); //Calling of setTimeout to start polling loop. 
+  //setTimeout(createTable, 5000); //Calling of setTimeout to start polling loop. 
+  createTable();
 
   const command = 'dashboard: open'; //Command for opening dashboard through Command Line
   app.commands.addCommand(command, {
