@@ -15,9 +15,16 @@ button{
     border: none;
     color: white;
     border-radius: 8px;
-    font-size: 13px;
-    width: 50px;
-    height: 30px;
+    font-size: 12px;
+    width: 40px;
+    height: 20px;
+    text-align: center;
+}
+
+button:active{
+    transform: scale(0.98);
+
+    box-shadow: 1.5px 1px 20px 1px rgba(0, 0, 0, 0.24)
 }
 
 progress {
