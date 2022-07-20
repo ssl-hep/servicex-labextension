@@ -224,7 +224,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
   let state = {
     'querySet': arr,
     'page': 1,
-    'rows': 5
+    'rows': 10
   }
 
   function pagination(querySet: any[], page: number, rows: number){
@@ -404,7 +404,6 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
           btn.type = 'button';
           btn.onclick = async function(){
             fetch('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation/'+ pageData.querySet[i].request_id + '/cancel');
-            console.log("Button was clicked.");
           }
           elem_7.append(btn);
         }
@@ -432,6 +431,10 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         button.style.border = '0.5px solid gray';
       }
       button.style.width = '20px';
+      button.onclick = function(){
+        state.page = parseInt(button.innerHTML, 10);
+        createTable();
+      }
       pagination_div.appendChild(button);
     }
 
@@ -593,7 +596,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
   widget.title.closable = true;
 
   setTimeout(createTable, 5000); //Calling of setTimeout to start polling loop. 
-  createTable();
+  //createTable();
 
   const command = 'dashboard: open'; //Command for opening dashboard through Command Line
   app.commands.addCommand(command, {
