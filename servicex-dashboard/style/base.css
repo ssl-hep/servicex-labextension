@@ -58,6 +58,8 @@ th{
     color: white;
     text-align: left;
     height: 36.67px;
+    position: sticky;
+    top: 0
 }
 
 td{

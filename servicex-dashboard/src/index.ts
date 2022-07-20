@@ -221,13 +221,13 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     }
   ];
 
-  let state = {
+  let state = { //indicates data set, current page, and number of rows for table
     'querySet': arr,
     'page': 1,
     'rows': 10
   }
 
-  function pagination(querySet: any[], page: number, rows: number){
+  function pagination(querySet: any[], page: number, rows: number){ //returns page specific data for table and the total number of pages
     let trimStart = (page-1) * rows;
     let trimEnd = trimStart + rows;
     var trimmedData = querySet.slice(trimStart, trimEnd);
@@ -239,25 +239,28 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
   }
 
   async function createTable(){ //Function that creates instance of dashboard
-    /* 1st part of code in testing polling
+    // 1st part of code in testing polling
+    /*
     const response = await fetch('./files/src/transformation.json');
-    const data = await response.json();
+    if(response.status >= 200 && response.status <= 299){
+      const data = await response.json();
+      console.log(data);
+      let arr = [];
+      for(let i = 0; i < 16; i++){
+        const obj = {
+          request_id: '',
+          status: '',
+          workers: 0
+        }
+        obj.request_id = data.requests[i].request_id;
+        obj.status = data.requests[i].status;
+        obj.workers = data.requests[i].workers;
 
-    let arr = [];
-    for(let i = 0; i < 16; i++){
-      const obj = {
-        request_id: '',
-        status: '',
-        workers: 0
-      }
-      obj.request_id = data.requests[i].request_id;
-      obj.status = data.requests[i].status;
-      obj.workers = data.requests[i].workers;
-
-      arr.push(obj);
+        arr.push(obj);
+    }else{
+      console.log(response.status, response.statusText);
     }*/
 
-    
     if(content.node.hasChildNodes()){   //Checking if there is already an exisiting table
       content.node.innerHTML = '';   //If it exists, it is removed
     }
@@ -265,18 +268,17 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     let table = document.createElement('table');  //Creating table and various table elements
     let thead = document.createElement('thead');
     let tbody = document.createElement('tbody');
+    table.appendChild(thead);
+    table.appendChild(tbody);
 
-    let div = document.createElement('div');
-    let h4 = document.createElement('h4');
-    h4.textContent = 'Transformation Requests';
-    div.appendChild(h4);
-
+    let div = document.createElement('div'); //Creating div that wraps around all other elements
     div.style.backgroundColor = 'white';
     div.style.padding = '7.5px 15px';
     div.style.margin = '0px';
     div.style.width = '700px';
-    table.appendChild(thead);
-    table.appendChild(tbody);
+    let h4 = document.createElement('h4'); //Creating header for page
+    h4.textContent = 'Transformation Requests';
+    div.appendChild(h4);
 
     div.appendChild(table);
     content.node.appendChild(div); //Appends newly created table to widget
@@ -311,10 +313,10 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
 
     }*/
 
-    let pageData = pagination(state.querySet, state.page, state.rows);
+    let pageData = pagination(state.querySet, state.page, state.rows); //Getting data set for specific page
     
     for(let i = -1; i < pageData.querySet.length; i++){    //for loop for creating table
-      let row = document.createElement('tr');
+      let row = document.createElement('tr'); //creating an individual row and the elements within it
       let elem_1, elem_2, elem_3, elem_4, elem_5, elem_6, elem_7;
       if(i == -1){  //For header of table (creating elements and attaching them)
         elem_1 = document.createElement('th');
@@ -397,7 +399,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         elem_6 = document.createElement('td');
         elem_6.innerHTML = pageData.querySet[i].workers;
         row.appendChild(elem_6);
-        elem_7 = document.createElement('td');
+        elem_7 = document.createElement('td');;
         if(pageData.querySet[i].needs_action){ //If status is 'submitted' or 'running', button is displayed to cancel the request (Work In Progress)
           let btn = document.createElement('button');
           btn.innerHTML = 'Cancel';
@@ -412,16 +414,16 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
       }
     }
 
-    let pagination_div = document.createElement('div');
+    let pagination_div = document.createElement('div'); //Creating pagination bar
     pagination_div.style.color = 'white';
     pagination_div.style.justifyContent = 'center';
     pagination_div.style.padding = '10px';
 
-    for(var page = 1; page <= pageData.pages; page++){
+    for(var page = 1; page <= pageData.pages; page++){ //Adding buttons to pagination bar
       let button = document.createElement('button');
       button.innerHTML = page.toString();
       button.style.borderRadius = '0px';
-      if(page == state.page){
+      if(page == state.page){ //Highlighting button of current page
         button.style.backgroundColor = 'rgb(0, 89, 255)';
         button.style.color = 'white';
         button.style.border = '0.5px solid rgb(0,89,255)';
@@ -431,7 +433,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         button.style.border = '0.5px solid gray';
       }
       button.style.width = '20px';
-      button.onclick = function(){
+      button.onclick = function(){ //Widget "reloads" when one of pagination buttons is clicked
         state.page = parseInt(button.innerHTML, 10);
         createTable();
       }
@@ -443,7 +445,6 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     setTimeout(createTable, 5000); //Call for polling inside createTable()
  
     /* Code for retrieving live json result (Not operational while CORS issue still exists)
-    const start = Date.now();
     const response = await fetch('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation');
     const data = await response.json();
     let arr_1 = [];
@@ -562,28 +563,6 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
             }
         }
         return arr;
-    }*/
-/*
-    function createButtons(pages: number){
-      let wrapper = document.getElementById('pagination_div');
-      if(wrapper != null){
-        console.log('If statement ran');
-        if(wrapper.innerHTML != ''){
-          wrapper.innerHTML = '';
-        }
-      
-        for(var page = 1; page <= pages; page++){
-          let button = document.createElement('button');
-          button.innerHTML = page.toString();
-          button.style.borderRadius = '0px';
-          button.style.color = 'white';
-          button.style.border = '0.5px solid gray';
-          wrapper.appendChild(button);
-        }
-      }
-  
-      console.log("Code Ran");
-        
     }*/
 
   }
