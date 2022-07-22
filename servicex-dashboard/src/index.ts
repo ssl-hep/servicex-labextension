@@ -224,7 +224,8 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
   let state = { //indicates data set, current page, and number of rows for table
     'querySet': arr,
     'page': 1,
-    'rows': 10
+    'rows': 3,
+    'window': 5
   }
 
   function pagination(querySet: any[], page: number, rows: number){ //returns page specific data for table and the total number of pages
@@ -238,9 +239,157 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     }
   }
 
-  async function createTable(){ //Function that creates instance of dashboard
-    // 1st part of code in testing polling
-    /*
+  function createButtons(pageData: any, pagination_div: HTMLDivElement){ //creates buttons for pagination bar
+    for(var page = 1; page <= pageData.pages; page++){ //Adding buttons to pagination bar
+      let button = document.createElement('button');
+      button.innerHTML = page.toString();
+      button.style.borderRadius = '0px';
+      if(page == state.page){ //Highlighting button of current page
+        button.style.backgroundColor = 'rgb(0, 89, 255)';
+        button.style.color = 'white';
+        button.style.border = '0.5px solid rgb(0,89,255)';
+      }else{
+        button.style.backgroundColor = 'white';
+        button.style.color = 'rgb(0, 89, 255)';
+        button.style.border = '0.5px solid gray';
+      }
+      button.style.width = '20px';
+      button.onclick = function(){ //Widget "reloads" when one of pagination buttons is clicked
+        state.page = parseInt(button.innerHTML, 10);
+        createTable();
+      }
+      pagination_div.appendChild(button);
+    }
+  }
+
+  //Code for retrieving live json result (Not operational while CORS issue still exists)
+  // @ts-ignore
+  async function getData(){
+    const start = Date.now();
+    const response = await fetch('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation');
+    const data = await response.json();
+    let arr_1 = [];
+    const urls = [];
+
+    for(var i = data.requests.length - 1; i > data.requests.length - 121; i--){
+      const obj = {
+          request_id: '',
+          status: '',
+          title_link: '',
+          start_time: '',
+          start_time_seconds: 0,
+          finish_time: '',
+          files_completed: 0,
+          total_files: 0,
+          files_skipped: -1,
+          needs_action: false,
+          workers: '' 
+      };
+
+      let request_id = data.requests[i]['request_id'];
+      obj['request_id'] = request_id;
+      let status = data.requests[i]['status'];
+      obj['status'] = status;
+      obj['title_link'] = 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/' + request_id;
+
+      let workers = data.requests[i]['workers'];
+      if(status == 'Complete' || status == 'Canceled' || status == 'Fatal'){
+          obj['needs_action'] = false;
+          obj['workers'] = '-';
+      }else{
+          obj['needs_action'] = true;
+          obj['workers'] = workers.toString();
+      }
+
+      urls.push('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation/' + request_id + '/status');
+
+      arr_1.push(obj);
+    }
+
+    const promises = urls.map(url => fetch(url));
+    const getRequests = await Promise.all(promises);
+    const morePromises = getRequests.map(res => res.json());
+    const getResults = await Promise.all(morePromises);
+
+    for(let i = 0; i < arr_1.length; i++){
+      let start_time = getResults[i]['submit-time'];
+      start_time = start_time.slice(0,19);
+      const date = new Date(start_time);
+      const seconds = Math.floor(date.getTime() / 1000);
+      arr_1[i]['start_time_seconds'] = seconds;
+      start_time = start_time.replace("T", " ");
+      let finish_time = getResults[i]['finish-time'];
+      if(finish_time != null){
+          finish_time = finish_time.replace("T", " ");
+          finish_time = finish_time.slice(0, 19);
+      }else{
+          finish_time = '-';
+      }
+      arr_1[i]['start_time'] = start_time;
+      arr_1[i]['finish_time'] = finish_time;
+
+      let files_processed = getResults[i]["files-processed"];
+      let files_remaining = getResults[i]["files-remaining"];
+      let files_skipped = getResults[i]["files-skipped"];
+      let total_files;
+      if (files_remaining == null) {
+          total_files = null;
+      }else{
+          total_files = files_processed + files_skipped + files_remaining;
+      }
+      arr_1[i]['files_completed'] = files_processed;
+      arr_1[i]['total_files'] = total_files;
+      arr_1[i]['files_skipped'] = files_skipped;
+    }
+
+    let sortedArr = quickSort(arr_1, 0, arr_1.length - 1);
+    console.log(sortedArr);
+    const duration = (Date.now() - start) / 1000;
+    console.log('Total run time: ' + duration);
+
+    function swap(arr: any[], left: number, right: number){
+      let temp = arr[left];
+      arr[left] = arr[right];
+      arr[right] = temp;
+    }
+
+    function partition(arr: any[], left: number, right: number){
+      let pivot = arr[Math.floor((right + left)/2)].start_time_seconds;
+      let i = left;
+      let j = right;
+      while(i <= j){
+          while(arr[i].start_time_seconds > pivot){
+              i++;
+          }
+          while(arr[j].start_time_seconds < pivot){
+              j--;
+          }
+          if(i <= j){
+              swap(arr, i, j);
+              i++;
+              j--;
+          }
+      }
+      return i;
+    }
+    
+    function quickSort(arr: any[], left: number, right: number){
+      let index;
+      if(arr.length > 1){
+          index = partition(arr, left, right);
+          if(left < index - 1){
+              quickSort(arr, left, index - 1);
+          }
+          if(index < right){
+              quickSort(arr, index, right);
+          }
+      }
+      return arr;
+    }
+  }
+
+  // @ts-ignore
+  async function testPolling(){  //Tests polling functionality with transformation.json
     const response = await fetch('./files/src/transformation.json');
     if(response.status >= 200 && response.status <= 299){
       const data = await response.json();
@@ -257,12 +406,9 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         obj.workers = data.requests[i].workers;
 
         arr.push(obj);
+      }
     }else{
       console.log(response.status, response.statusText);
-    }*/
-
-    if(content.node.hasChildNodes()){   //Checking if there is already an exisiting table
-      content.node.innerHTML = '';   //If it exists, it is removed
     }
 
     let table = document.createElement('table');  //Creating table and various table elements
@@ -281,9 +427,8 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     div.appendChild(h4);
 
     div.appendChild(table);
-    content.node.appendChild(div); //Appends newly created table to widget
-
-    /* 2nd part of code in testing polling
+    content.node.appendChild(div);
+    
     for(let i = -1; i < 15; i++){
       let row = document.createElement('tr');
       let elem_1, elem_2, elem_3;
@@ -310,9 +455,31 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         row.appendChild(elem_3);
         tbody.appendChild(row);
       }
+    }
+  }
 
-    }*/
+  async function createTable(){ //Function that creates instance of dashboard
+    if(content.node.hasChildNodes()){   //Checking if there is already an exisiting table
+      content.node.innerHTML = '';   //If it exists, it is removed
+    }
 
+    let table = document.createElement('table');  //Creating table and various table elements
+    let thead = document.createElement('thead');
+    let tbody = document.createElement('tbody');
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    let div = document.createElement('div'); //Creating div that wraps around all other elements
+    div.style.backgroundColor = 'white';
+    div.style.padding = '7.5px 15px';
+    div.style.margin = '0px';
+    div.style.width = '700px';
+    let h4 = document.createElement('h4'); //Creating header for page
+    h4.textContent = 'Transformation Requests';
+    div.appendChild(h4);
+
+    div.appendChild(table);
+    content.node.appendChild(div); //Appends newly created table to widget
     let pageData = pagination(state.querySet, state.page, state.rows); //Getting data set for specific page
     
     for(let i = -1; i < pageData.querySet.length; i++){    //for loop for creating table
@@ -320,7 +487,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
       let elem_1, elem_2, elem_3, elem_4, elem_5, elem_6, elem_7;
       if(i == -1){  //For header of table (creating elements and attaching them)
         elem_1 = document.createElement('th');
-        elem_1.innerHTML = "Title";
+        elem_1.innerHTML = "Request";
         row.appendChild(elem_1);
         elem_2 = document.createElement('th');
         elem_2.innerHTML = "Start Time";
@@ -345,7 +512,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         elem_1 = document.createElement('td');
         let link = document.createElement('a'); //Creating link to transform request page
         link.setAttribute("href", pageData.querySet[i]['title_link']);
-        let linkText = document.createTextNode("Untitled");
+        let linkText = document.createTextNode('Link');
         link.appendChild(linkText);
         elem_1.appendChild(link);
         row.appendChild(elem_1);
@@ -406,6 +573,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
           btn.type = 'button';
           btn.onclick = async function(){
             fetch('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation/'+ pageData.querySet[i].request_id + '/cancel');
+            createTable();
           }
           elem_7.append(btn);
         }
@@ -419,152 +587,10 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     pagination_div.style.justifyContent = 'center';
     pagination_div.style.padding = '10px';
 
-    for(var page = 1; page <= pageData.pages; page++){ //Adding buttons to pagination bar
-      let button = document.createElement('button');
-      button.innerHTML = page.toString();
-      button.style.borderRadius = '0px';
-      if(page == state.page){ //Highlighting button of current page
-        button.style.backgroundColor = 'rgb(0, 89, 255)';
-        button.style.color = 'white';
-        button.style.border = '0.5px solid rgb(0,89,255)';
-      }else{
-        button.style.backgroundColor = 'white';
-        button.style.color = 'rgb(0, 89, 255)';
-        button.style.border = '0.5px solid gray';
-      }
-      button.style.width = '20px';
-      button.onclick = function(){ //Widget "reloads" when one of pagination buttons is clicked
-        state.page = parseInt(button.innerHTML, 10);
-        createTable();
-      }
-      pagination_div.appendChild(button);
-    }
-
+    createButtons(pageData, pagination_div);
     div.appendChild(pagination_div);
     
     setTimeout(createTable, 5000); //Call for polling inside createTable()
- 
-    /* Code for retrieving live json result (Not operational while CORS issue still exists)
-    const response = await fetch('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation');
-    const data = await response.json();
-    let arr_1 = [];
-    const urls = [];
-
-    for(var i = data.requests.length - 1; i > data.requests.length - 121; i--){
-        const obj = {
-            request_id: '',
-            status: '',
-            title_link: '',
-            start_time: '',
-            start_time_seconds: 0,
-            finish_time: '',
-            files_completed: 0,
-            total_files: 0,
-            files_skipped: -1,
-            needs_action: false,
-            workers: '' 
-        };
-
-        let request_id = data.requests[i]['request_id'];
-        obj['request_id'] = request_id;
-        let status = data.requests[i]['status'];
-        obj['status'] = status;
-        obj['title_link'] = 'https://opendataaf-servicex.servicex.coffea-opendata.casa/transformation-request/' + request_id;
-
-        let workers = data.requests[i]['workers'];
-        if(status == 'Complete' || status == 'Canceled' || status == 'Fatal'){
-            obj['needs_action'] = false;
-            obj['workers'] = '-';
-        }else{
-            obj['needs_action'] = true;
-            obj['workers'] = workers.toString();
-        }
-
-        urls.push('https://opendataaf-servicex.servicex.coffea-opendata.casa/servicex/transformation/' + request_id + '/status');
-
-        arr_1.push(obj);
-    }
-
-    const promises = urls.map(url => fetch(url));
-    const getRequests = await Promise.all(promises);
-    const morePromises = getRequests.map(res => res.json());
-    const getResults = await Promise.all(morePromises);
-
-    for(let i = 0; i < arr_1.length; i++){
-        let start_time = getResults[i]['submit-time'];
-        start_time = start_time.slice(0,19);
-        const date = new Date(start_time);
-        const seconds = Math.floor(date.getTime() / 1000);
-        arr_1[i]['start_time_seconds'] = seconds;
-        start_time = start_time.replace("T", " ");
-        let finish_time = getResults[i]['finish-time'];
-        if(finish_time != null){
-            finish_time = finish_time.replace("T", " ");
-            finish_time = finish_time.slice(0, 19);
-        }else{
-            finish_time = '-';
-        }
-        arr_1[i]['start_time'] = start_time;
-        arr_1[i]['finish_time'] = finish_time;
-
-        let files_processed = getResults[i]["files-processed"];
-        let files_remaining = getResults[i]["files-remaining"];
-        let files_skipped = getResults[i]["files-skipped"];
-        let total_files;
-        if (files_remaining == null) {
-            total_files = null;
-        }else{
-            total_files = files_processed + files_skipped + files_remaining;
-        }
-        arr_1[i]['files_completed'] = files_processed;
-        arr_1[i]['total_files'] = total_files;
-        arr_1[i]['files_skipped'] = files_skipped;
-    }
-
-    let sortedArr = quickSort(arr_1, 0, arr_1.length - 1);
-    console.log(sortedArr);
-    const duration = (Date.now() - start) / 1000;
-    console.log('Total run time: ' + duration);
-    function swap(arr: any[], left: number, right: number){
-      let temp = arr[left];
-      arr[left] = arr[right];
-      arr[right] = temp;
-    }
-  
-    function partition(arr: any[], left: number, right: number){
-        let pivot = arr[Math.floor((right + left)/2)].start_time_seconds;
-        let i = left;
-        let j = right;
-        while(i <= j){
-            while(arr[i].start_time_seconds > pivot){
-                i++;
-            }
-            while(arr[j].start_time_seconds < pivot){
-                j--;
-            }
-            if(i <= j){
-                swap(arr, i, j);
-                i++;
-                j--;
-            }
-        }
-        return i;
-    }
-    
-    function quickSort(arr: any[], left: number, right: number){
-        let index;
-        if(arr.length > 1){
-            index = partition(arr, left, right);
-            if(left < index - 1){
-                quickSort(arr, left, index - 1);
-            }
-            if(index < right){
-                quickSort(arr, index, right);
-            }
-        }
-        return arr;
-    }*/
-
   }
 
   const content = new Widget(); //Creating widget and adding scrolling capabilites to it
@@ -573,9 +599,8 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
   widget.id = 'servicex-dashboard';
   widget.title.label = 'ServiceX Dashboard';
   widget.title.closable = true;
-
-  setTimeout(createTable, 5000); //Calling of setTimeout to start polling loop. 
-  //createTable();
+ 
+  createTable();
 
   const command = 'dashboard: open'; //Command for opening dashboard through Command Line
   app.commands.addCommand(command, {
