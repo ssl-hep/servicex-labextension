@@ -221,10 +221,10 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     }
   ];
 
-  let state = { //indicates data set, current page, and number of rows for table
+  let state = { //indicates data set, current page, number of rows, and numbers of buttons on bar for table
     'querySet': arr,
     'page': 1,
-    'rows': 3,
+    'rows': 10,
     'window': 5
   }
 
@@ -236,29 +236,6 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     return {
       'querySet': trimmedData,
       'pages': pages
-    }
-  }
-
-  function createButtons(pageData: any, pagination_div: HTMLDivElement){ //creates buttons for pagination bar
-    for(var page = 1; page <= pageData.pages; page++){ //Adding buttons to pagination bar
-      let button = document.createElement('button');
-      button.innerHTML = page.toString();
-      button.style.borderRadius = '0px';
-      if(page == state.page){ //Highlighting button of current page
-        button.style.backgroundColor = 'rgb(0, 89, 255)';
-        button.style.color = 'white';
-        button.style.border = '0.5px solid rgb(0,89,255)';
-      }else{
-        button.style.backgroundColor = 'white';
-        button.style.color = 'rgb(0, 89, 255)';
-        button.style.border = '0.5px solid gray';
-      }
-      button.style.width = '20px';
-      button.onclick = function(){ //Widget "reloads" when one of pagination buttons is clicked
-        state.page = parseInt(button.innerHTML, 10);
-        createTable();
-      }
-      pagination_div.appendChild(button);
     }
   }
 
@@ -346,6 +323,8 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     console.log(sortedArr);
     const duration = (Date.now() - start) / 1000;
     console.log('Total run time: ' + duration);
+
+    return arr_1;
 
     function swap(arr: any[], left: number, right: number){
       let temp = arr[left];
@@ -456,6 +435,74 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         tbody.appendChild(row);
       }
     }
+  }
+
+  function createButtons(pageData: any, pagination_div: HTMLDivElement){ //creates buttons for pagination bar
+    let maxLeft = (state.page - Math.floor(state.window / 2)); //Get leftmost and rightmost buttons for bar
+    let maxRight = (state.page + Math.floor(state.window / 2));
+
+    if(maxLeft < 1){
+      maxLeft = 1;
+      maxRight = state.window;
+    }
+    if(maxRight > pageData.pages){
+      maxLeft = pageData.pages - (state.window - 1);
+      if(maxLeft < 1){
+        maxLeft = 1;
+      }
+      maxRight = pageData.pages;
+    }
+    
+    if(maxLeft != 1){ //Add first button to bar if leftmost button is not 1
+      let first = document.createElement('button');
+      first.innerHTML = '<<';
+      first.style.borderRadius = '0px';
+      first.style.backgroundColor = 'white';
+      first.style.color = 'rgb(0,89,255)';
+      first.style.border = '0.5px solid gray';
+      first.style.width = '20px';
+      first.onclick = function(){
+        state.page = 1;
+        //createTable();
+      }
+      pagination_div.appendChild(first);
+    }
+    for(var page = maxLeft; page <= maxRight; page++){ //Adding buttons to pagination bar
+      let button = document.createElement('button');
+      button.innerHTML = page.toString();
+      button.style.borderRadius = '0px';
+      if(page == state.page){ //Highlighting button of current page
+        button.style.backgroundColor = 'rgb(0, 89, 255)';
+        button.style.color = 'white';
+        button.style.border = '0.5px solid rgb(0,89,255)';
+      }else{
+        button.style.backgroundColor = 'white';
+        button.style.color = 'rgb(0, 89, 255)';
+        button.style.border = '0.5px solid gray';
+      }
+      button.style.width = '20px';
+      button.onclick = function(){ //Widget "reloads" when one of pagination buttons is clicked
+        state.page = parseInt(button.innerHTML, 10);
+        //createTable();
+      }
+      pagination_div.appendChild(button);
+    }
+    
+    if(maxRight != pageData.pages){ //Add last button if rightmost button is not the number of total pages
+      let last = document.createElement('button');
+      last.innerHTML = '>>';
+      last.style.borderRadius = '0px';
+      last.style.backgroundColor = 'white';
+      last.style.color = 'rgb(0,89,255)';
+      last.style.border = '0.5px solid gray';
+      last.style.width = '20px';
+      last.onclick = function(){
+        state.page = pageData.pages;
+        //createTable();
+      }
+      pagination_div.appendChild(last);
+    }
+
   }
 
   async function createTable(){ //Function that creates instance of dashboard
@@ -590,7 +637,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     createButtons(pageData, pagination_div);
     div.appendChild(pagination_div);
     
-    setTimeout(createTable, 5000); //Call for polling inside createTable()
+    setTimeout(createTable, 2500); //Call for polling inside createTable()
   }
 
   const content = new Widget(); //Creating widget and adding scrolling capabilites to it
