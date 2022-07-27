@@ -4,32 +4,39 @@
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
 
+.servicex-logo{
+    background-image: url(ServiceXLogo.svg);
+}
+
+#setting-editor .servicex-logo {
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-position: center;
+  }
+
 a{
-   /* color: rgb(10, 106, 240);*/
     color: rgb(0, 89, 255);
     font-weight: bold;
 }
 
 button{
-    background-color: rgb(200, 30, 30);
+    background-color: rgb(226, 28, 28);
     border: none;
     color: white;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 12px;
-    width: 40px;
-    height: 20px;
+    width: 45px;
+    height: 22.5px;
     text-align: center;
 }
 
 button:active{
     transform: scale(0.98);
-
     box-shadow: 1.5px 1px 20px 1px rgba(0, 0, 0, 0.24)
 }
 
-progress {
-    width: 60px;
-    height: 20px;
+button:hover{
+    filter: grayscale(20%);
 }
 
 .my-apodWidget {
@@ -63,26 +70,14 @@ th{
 }
 
 td{
-    /*background-color: white;*/
     padding: 5px 10px;
     border: 0.5px solid gray;
     text-align: top;
 }
-
-/*
-caption{
-    background-color: white;
-    padding: 7.5px 15px;
-    text-align: left;
-    font-weight: 600;
-    border: 0.5px solid gray
-}*/
 
 h4{
     background-color:  white;
     font-size: 20px;
     font-weight: 500;
     margin: 7.5px 0px;
-    /*padding: 5px;*/
 }
-
