@@ -84,6 +84,10 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         button.style.border = '0.5px solid gray';
       }
       button.style.width = '20px';
+      button.style.height = '22.5px';
+      button.style.borderRadius = '0px';
+      button.style.fontSize = '12px';
+      button.style.textAlign = 'center';
       button.onclick = function(){ //Widget "reloads" when one of pagination buttons is clicked
         state.page = parseInt(button.innerHTML, 10);
         //createTable();
@@ -245,7 +249,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     div.style.backgroundColor = 'white';
     div.style.padding = '7.5px 15px';
     div.style.margin = '0px';
-    div.style.width = '700px';
+    div.style.width = '540px';
     let h4 = document.createElement('h4'); //Creating header for page
     h4.textContent = 'Transformation Requests';
     div.appendChild(h4);
@@ -305,16 +309,16 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
             loading_bar.style.width = '60px';
             loading_bar.style.height = '15px';
             loading_bar.style.backgroundColor = 'rgb(200, 200, 200)';
-            loading_bar.style.marginTop = '2.5px';
-            loading_bar.style.borderRadius = '8px';
+            loading_bar.style.marginTop = '4px';
+            loading_bar.style.borderRadius = '6px';
 
             let progress_bar = document.createElement('span'); //Creating inner element of progress bar
-            progress_bar.style.backgroundImage = 'linear-gradient(to bottom, #c0d0fa, #0067f6 50%)';
-            progress_bar.style.position = 'relative';
+            progress_bar.style.backgroundImage = 'linear-gradient(to bottom, #31a8ec, #0067f6 50%)';
+            //progress_bar.style.backgroundColor = 'rgb(0, 89, 255)';
             progress_bar.style.display = 'block';
             progress_bar.style.width = ((completed_files/total_files)*60).toString() + 'px';
             progress_bar.style.height = '15px';
-            progress_bar.style.borderRadius = '8px';
+            progress_bar.style.borderRadius = '6px';
             progress_bar.style.textAlign = 'center';
             progress_bar.style.color = 'white';
             progress_bar.style.fontSize = '12.5px';
@@ -360,6 +364,14 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
           let btn = document.createElement('button');
           btn.innerHTML = 'Cancel';
           btn.type = 'button';
+          btn.style.backgroundColor =  'rgb(226, 28, 28)';
+          btn.style.border = 'none';
+          btn.style.color = 'white';
+          btn.style.borderRadius =  '0.25rem';
+          btn.style.fontSize = '12px';
+          btn.style.width = '45px';
+          btn.style.height=  '24.75px';
+          btn.style.textAlign = 'center';
           btn.onclick = async function(){
             fetch('https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/servicex/transformation/'+ pageData.querySet[i].request_id + '/cancel');
             createTable();
@@ -379,7 +391,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     createButtons(pageData, pagination_div);
     div.appendChild(pagination_div);
     
-    setTimeout(createTable, 5000); //Call for polling inside createTable()
+    //setTimeout(createTable, 5000); //Call for polling inside createTable()
   }
 
   const content = new Widget(); //Creating widget and adding scrolling capabilites to it
