@@ -26,7 +26,8 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
   let state = { //indicates current page, number of rows, and numbers of buttons on bar for table
     'page': 1,
     'rows': 10,
-    'window': 5
+    'window': 5,
+    'desc': false
   }
 
   function pagination(querySet: any[], page: number, rows: number){ //returns page specific data for table and the total number of pages
@@ -116,10 +117,11 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     const start = Date.now();
     const response = await fetch('https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/servicex/transformation');
     const data = await response.json(); //Getting json response for all requests
+    let requests = data.requests;
     let arr_1 = [];
     const urls = [];
 
-    for(var i = data.requests.length - 1; i > -1; i--){ //creating array containing objects for all of requests
+    for(var i = requests.length - 1; i > -1; i--){ //creating array containing objects for all of requests
       const obj = {
           request_id: '',
           status: '',
@@ -134,13 +136,13 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
           workers: '' 
       };
 
-      let request_id = data.requests[i]['request_id'];
+      let request_id = requests[i]['request_id'];
       obj['request_id'] = request_id;
-      let status = data.requests[i]['status'];
+      let status = requests[i]['status'];
       obj['status'] = status;
       obj['title_link'] = 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/' + request_id;
 
-      let workers = data.requests[i]['workers'];
+      let workers = requests[i]['workers'];
       if(status == 'Complete' || status == 'Canceled' || status == 'Fatal'){ //Depending on status, the number of workers/cancel button may show
           obj['needs_action'] = false;
           obj['workers'] = '-';
@@ -206,17 +208,31 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
       let i = left;
       let j = right;
       while(i <= j){
+        if(state.desc){
           while(arr[i].start_time_seconds > pivot){
-              i++;
+            i++;
           }
           while(arr[j].start_time_seconds < pivot){
-              j--;
+            j--;
           }
           if(i <= j){
-              swap(arr, i, j);
-              i++;
-              j--;
+            swap(arr, i, j);
+            i++;
+            j--;
           }
+        }else{
+          while(arr[i].start_time_seconds < pivot){
+            i++;
+          }
+          while(arr[j].start_time_seconds > pivot){
+            j--;
+          }
+          if(i <= j){
+            swap(arr, i, j);
+            i++;
+            j--;
+          }
+        }
       }
       return i;
     }
@@ -249,10 +265,21 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     div.style.backgroundColor = 'white';
     div.style.padding = '7.5px 15px';
     div.style.margin = '0px';
-    div.style.width = '540px';
+    div.style.width = '535px';
     let h4 = document.createElement('h4'); //Creating header for page
     h4.textContent = 'Transformation Requests';
-    div.appendChild(h4);
+    h4.style.float = 'left';
+    let sort_div = document.createElement('div');
+    //sort_div.style.backgroundColor = 'rgb(36, 32, 32)';
+    sort_div.style.backgroundColor = 'white';
+    sort_div.style.width = '101.16px';
+    sort_div.style.marginTop = '7.5px';
+    sort_div.style.height = '25px';
+    sort_div.style.float = 'right';
+    let div_row = document.createElement('div');
+    div_row.appendChild(h4);
+    div_row.appendChild(sort_div);
+    div.appendChild(div_row);
 
     div.appendChild(table);
     content.node.appendChild(div); //Appends newly created table to widget
@@ -391,7 +418,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     createButtons(pageData, pagination_div);
     div.appendChild(pagination_div);
     
-    //setTimeout(createTable, 5000); //Call for polling inside createTable()
+    setTimeout(createTable, 5000); //Call for polling inside createTable()
   }
 
   const content = new Widget(); //Creating widget and adding scrolling capabilites to it
