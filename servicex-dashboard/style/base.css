@@ -15,17 +15,44 @@
 }
 
 a{
-    color: rgb(0, 89, 255);
-    font-weight: bold;
+    color: #007bff;
 }
 
-button:active{
+#firstLastButton{
+    border-radius: 0px;
+    background-color: white;
+    color: #007bff;
+    border: 0.5px solid gray;
+    width: 20px;
+    height: 22.5px;
+}
+
+#firstLastButton:active{
     transform: scale(0.98);
     box-shadow: 1.5px 1px 20px 1px rgba(0, 0, 0, 0.24)
 }
 
-button:hover{
+#firstLastButton:hover{
     filter: grayscale(20%);
+    cursor: pointer;
+}
+
+#paginationButton{
+    border-radius: 0px;
+    width: 20px;
+    height: 22.5px;
+    font-size: 12px;
+    text-align: center;
+}
+
+#paginationButton:active{
+    transform: scale(0.98);
+    box-shadow: 1.5px 1px 20px 1px rgba(0, 0, 0, 0.24)
+}
+
+#paginationButton:hover{
+    filter: grayscale(20%);
+    cursor: pointer;
 }
 
 .my-apodWidget {
@@ -34,7 +61,7 @@ button:hover{
     overflow: auto;
 }
 
-table{
+#requestTable{
     background-color: white;
     border-collapse: collapse;
     border: 0.5px solid gray;
@@ -49,7 +76,7 @@ tr:nth-child(odd) {
 }
 
 th{
-    background-color: rgb(36, 32, 32);
+    background-color: #343a40;
     padding: 5px 10px;
     border: 0.5px solid gray;
     font-weight: bold;
@@ -68,9 +95,31 @@ td{
     width: 48.35px;
 }
 
-h4{
+#header{
     background-color:  white;
     font-size: 20px;
     font-weight: 500;
     margin: 7.5px 0px;
+    float: left;
+}
+
+#cancelButton{
+    background-color: #dc3545;
+    border: none;
+    color: white;
+    border-radius: 0.25rem;
+    font-size: 12px;
+    width : 45px;
+    height: 24.75px;
+    text-align: center;
+}
+
+#cancelButton:active{
+    transform: scale(0.98);
+    box-shadow: 1.5px 1px 20px 1px rgba(0, 0, 0, 0.24)
+}
+
+#cancelButton:hover{
+    filter: grayscale(20%);
+    cursor: pointer;
 }

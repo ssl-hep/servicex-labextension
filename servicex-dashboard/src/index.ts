@@ -11,7 +11,7 @@ import { Widget } from '@lumino/widgets';
  * Initialization data for the servicex-dashboard extension.
  */
 
-const plugin: JupyterFrontEndPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {   
   id: 'servicex-dashboard:plugin',
   autoStart: true,
   requires: [ICommandPalette],
@@ -23,11 +23,12 @@ export default plugin;
 async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Activate function for plugin
   console.log('JupyterLab extension servicex-dashboard is activated!');
 
-  let state = { //indicates current page, number of rows, and numbers of buttons on bar for table
+  let state = { //indicates current page, number of rows, order, and number of buttons on bar for table
     'page': 1,
     'rows': 10,
     'window': 5,
-    'desc': false
+    'desc': true,
+    //'click_count': 0
   }
 
   function pagination(querySet: any[], page: number, rows: number){ //returns page specific data for table and the total number of pages
@@ -56,39 +57,30 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
       }
       maxRight = pageData.pages;
     }
-    
     if(maxLeft != 1){ //Add first button to bar if leftmost button is not 1
       let first = document.createElement('button');
+      first.setAttribute('id', 'firstLastButton');
       first.innerHTML = '<<';
-      first.style.borderRadius = '0px';
-      first.style.backgroundColor = 'white';
-      first.style.color = 'rgb(0,89,255)';
-      first.style.border = '0.5px solid gray';
-      first.style.width = '20px';
-      first.onclick = function(){
+      first.onclick = function(){ //Current page is set to 1 if button is clicked
         state.page = 1;
         //createTable();
       }
       pagination_div.appendChild(first);
     }
+
     for(var page = maxLeft; page <= maxRight; page++){ //Adding buttons to pagination bar
       let button = document.createElement('button');
+      button.setAttribute('id', 'paginationButton');
       button.innerHTML = page.toString();
-      button.style.borderRadius = '0px';
       if(page == state.page){ //Highlighting button of current page
-        button.style.backgroundColor = 'rgb(0, 89, 255)';
+        button.style.backgroundColor = '#007bff';
         button.style.color = 'white';
-        button.style.border = '0.5px solid rgb(0,89,255)';
+        button.style.border = '0.5px solid #007bff';
       }else{
         button.style.backgroundColor = 'white';
-        button.style.color = 'rgb(0, 89, 255)';
+        button.style.color = '#007bff';
         button.style.border = '0.5px solid gray';
       }
-      button.style.width = '20px';
-      button.style.height = '22.5px';
-      button.style.borderRadius = '0px';
-      button.style.fontSize = '12px';
-      button.style.textAlign = 'center';
       button.onclick = function(){ //Widget "reloads" when one of pagination buttons is clicked
         state.page = parseInt(button.innerHTML, 10);
         //createTable();
@@ -98,13 +90,9 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     
     if(maxRight != pageData.pages){ //Add last button if rightmost button is not the number of total pages
       let last = document.createElement('button');
+      last.setAttribute('id', 'firstLastButton');
       last.innerHTML = '>>';
-      last.style.borderRadius = '0px';
-      last.style.backgroundColor = 'white';
-      last.style.color = 'rgb(0,89,255)';
-      last.style.border = '0.5px solid gray';
-      last.style.width = '20px';
-      last.onclick = function(){
+      last.onclick = function(){ //Current button is set to the last possible button when clicked
         state.page = pageData.pages;
         //createTable();
       }
@@ -135,7 +123,6 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
           needs_action: false,
           workers: '' 
       };
-
       let request_id = requests[i]['request_id'];
       obj['request_id'] = request_id;
       let status = requests[i]['status'];
@@ -152,7 +139,6 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
       }
 
       urls.push('https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/servicex/transformation/' + request_id + '/status'); //pushing urls of requests for later use
-
       arr_1.push(obj); //pushing object for a single request into main array
     }
 
@@ -256,6 +242,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     }
 
     let table = document.createElement('table');  //Creating table and various table elements
+    table.setAttribute('id', 'requestTable');
     let thead = document.createElement('thead');
     let tbody = document.createElement('tbody');
     table.appendChild(thead);
@@ -266,21 +253,62 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     div.style.padding = '7.5px 15px';
     div.style.margin = '0px';
     div.style.width = '535px';
-    let h4 = document.createElement('h4'); //Creating header for page
-    h4.textContent = 'Transformation Requests';
-    h4.style.float = 'left';
-    let sort_div = document.createElement('div');
-    //sort_div.style.backgroundColor = 'rgb(36, 32, 32)';
-    sort_div.style.backgroundColor = 'white';
-    sort_div.style.width = '101.16px';
-    sort_div.style.marginTop = '7.5px';
-    sort_div.style.height = '25px';
-    sort_div.style.float = 'right';
-    let div_row = document.createElement('div');
-    div_row.appendChild(h4);
-    div_row.appendChild(sort_div);
-    div.appendChild(div_row);
 
+    let h4 = document.createElement('h4'); //Creating header for page
+    h4.setAttribute('id', 'header');
+    h4.textContent = 'Transformation Requests';
+
+    /*
+    let dropdown_div = document.createElement('div');
+    dropdown_div.style.backgroundColor = 'white';
+    dropdown_div.style.width = '101.16px';
+    dropdown_div.style.marginTop = '7.5px';
+    dropdown_div.style.height = '25px';
+    dropdown_div.style.float = 'right';
+    dropdown_div.style.position = 'relative';
+
+    let sort_button = document.createElement('button');
+    sort_button.style.backgroundColor = 'rgb(36, 32, 32)';
+    sort_button.style.width = '87.66px';
+    sort_button.style.height = '17.5px';
+    
+    let sort_div = document.createElement('div');
+    sort_div.style.position = 'absolute';
+    sort_div.style.backgroundColor = 'white';
+    sort_div.style.width = '103.66px';
+    sort_div.style.zIndex = '1';
+    sort_div.style.display = 'none';
+    let content_1 = document.createElement('button');
+    content_1.style.width = '87.66px';
+    content_1.style.height = '17.5px';
+    content_1.style.backgroundColor = 'white';
+    content_1.style.border = '0px';
+    let content_2 = document.createElement('button');
+    content_2.style.width = '87.66px';
+    content_2.style.height = '17.5px';
+    content_2.style.backgroundColor = 'white';
+    content_2.style.border = '0px';
+    let div_row = document.createElement('div');
+    sort_div.appendChild(content_1);
+    sort_div.appendChild(content_2);
+    dropdown_div.appendChild(sort_button);
+    dropdown_div.appendChild(sort_div);
+    div_row.appendChild(h4);
+    div_row.appendChild(dropdown_div);
+
+    sort_button.onclick = function(){
+      if(state.click_count % 2 == 0){
+        sort_div.style.display = 'block';
+      }else{
+        sort_div.style.display = 'none';
+      }
+      state.click_count++;
+      console.log(state.click_count);
+    }*/
+
+    let div_row = document.createElement('div'); //Creating div that contains page header
+    div_row.appendChild(h4);
+    div.appendChild(div_row);
     div.appendChild(table);
     content.node.appendChild(div); //Appends newly created table to widget
     let pageData = pagination(arr, state.page, state.rows); //Getting data set for specific page
@@ -314,6 +342,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
       }else{  //For the data section of the table (creating elements and attaching them)
         elem_1 = document.createElement('td');
         let link = document.createElement('a'); //Creating link to transform request page
+        link.style.fontWeight = 'bold';
         link.setAttribute("href", pageData.querySet[i]['title_link']);
         let linkText = document.createTextNode('Link');
         link.appendChild(linkText);
@@ -340,8 +369,8 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
             loading_bar.style.borderRadius = '6px';
 
             let progress_bar = document.createElement('span'); //Creating inner element of progress bar
-            progress_bar.style.backgroundImage = 'linear-gradient(to bottom, #31a8ec, #0067f6 50%)';
-            //progress_bar.style.backgroundColor = 'rgb(0, 89, 255)';
+            //progress_bar.style.backgroundImage = 'linear-gradient(to bottom, #31a8ec, #0067f6 50%)';
+            progress_bar.style.backgroundColor = '#007bff';
             progress_bar.style.display = 'block';
             progress_bar.style.width = ((completed_files/total_files)*60).toString() + 'px';
             progress_bar.style.height = '15px';
@@ -389,19 +418,12 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         elem_7 = document.createElement('td');;
         if(pageData.querySet[i].needs_action){ //If status is 'submitted' or 'running', button is displayed to cancel the request (Work In Progress)
           let btn = document.createElement('button');
+          btn.setAttribute('id', 'cancelButton');
           btn.innerHTML = 'Cancel';
           btn.type = 'button';
-          btn.style.backgroundColor =  'rgb(226, 28, 28)';
-          btn.style.border = 'none';
-          btn.style.color = 'white';
-          btn.style.borderRadius =  '0.25rem';
-          btn.style.fontSize = '12px';
-          btn.style.width = '45px';
-          btn.style.height=  '24.75px';
-          btn.style.textAlign = 'center';
           btn.onclick = async function(){
             fetch('https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/servicex/transformation/'+ pageData.querySet[i].request_id + '/cancel');
-            createTable();
+            //createTable();
           }
           elem_7.append(btn);
         }
@@ -418,7 +440,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     createButtons(pageData, pagination_div);
     div.appendChild(pagination_div);
     
-    setTimeout(createTable, 5000); //Call for polling inside createTable()
+    setTimeout(createTable, 1500); //Call for polling inside createTable()
   }
 
   const content = new Widget(); //Creating widget and adding scrolling capabilites to it
