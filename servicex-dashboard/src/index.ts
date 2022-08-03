@@ -25,10 +25,9 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
 
   let state = { //indicates current page, number of rows, order, and number of buttons on bar for table
     'page': 1,
-    'rows': 10,
-    'window': 5,
+    'rows': 2,
+    'window': 3,
     'desc': true,
-    //'click_count': 0
   }
 
   function pagination(querySet: any[], page: number, rows: number){ //returns page specific data for table and the total number of pages
@@ -258,54 +257,6 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     h4.setAttribute('id', 'header');
     h4.textContent = 'Transformation Requests';
 
-    /*
-    let dropdown_div = document.createElement('div');
-    dropdown_div.style.backgroundColor = 'white';
-    dropdown_div.style.width = '101.16px';
-    dropdown_div.style.marginTop = '7.5px';
-    dropdown_div.style.height = '25px';
-    dropdown_div.style.float = 'right';
-    dropdown_div.style.position = 'relative';
-
-    let sort_button = document.createElement('button');
-    sort_button.style.backgroundColor = 'rgb(36, 32, 32)';
-    sort_button.style.width = '87.66px';
-    sort_button.style.height = '17.5px';
-    
-    let sort_div = document.createElement('div');
-    sort_div.style.position = 'absolute';
-    sort_div.style.backgroundColor = 'white';
-    sort_div.style.width = '103.66px';
-    sort_div.style.zIndex = '1';
-    sort_div.style.display = 'none';
-    let content_1 = document.createElement('button');
-    content_1.style.width = '87.66px';
-    content_1.style.height = '17.5px';
-    content_1.style.backgroundColor = 'white';
-    content_1.style.border = '0px';
-    let content_2 = document.createElement('button');
-    content_2.style.width = '87.66px';
-    content_2.style.height = '17.5px';
-    content_2.style.backgroundColor = 'white';
-    content_2.style.border = '0px';
-    let div_row = document.createElement('div');
-    sort_div.appendChild(content_1);
-    sort_div.appendChild(content_2);
-    dropdown_div.appendChild(sort_button);
-    dropdown_div.appendChild(sort_div);
-    div_row.appendChild(h4);
-    div_row.appendChild(dropdown_div);
-
-    sort_button.onclick = function(){
-      if(state.click_count % 2 == 0){
-        sort_div.style.display = 'block';
-      }else{
-        sort_div.style.display = 'none';
-      }
-      state.click_count++;
-      console.log(state.click_count);
-    }*/
-
     let div_row = document.createElement('div'); //Creating div that contains page header
     div_row.appendChild(h4);
     div.appendChild(div_row);
@@ -360,29 +311,25 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         if(pageData.querySet[i].status == 'Submitted' || pageData.querySet[i].status == 'Running'){ //If status is 'submitted' or 'running', progres bar is displayed
           let total_files = pageData.querySet[i].total_files;
           let completed_files = pageData.querySet[i].files_completed;
-          if(total_files != null){ //Null check to make sure code doesn't break. If pass, create progress bar
-            let loading_bar = document.createElement('div'); //Creating outer element of progress bar
-            loading_bar.style.width = '60px';
-            loading_bar.style.height = '15px';
-            loading_bar.style.backgroundColor = 'rgb(200, 200, 200)';
-            loading_bar.style.marginTop = '4px';
-            loading_bar.style.borderRadius = '6px';
-
-            let progress_bar = document.createElement('span'); //Creating inner element of progress bar
-            //progress_bar.style.backgroundImage = 'linear-gradient(to bottom, #31a8ec, #0067f6 50%)';
-            progress_bar.style.backgroundColor = '#007bff';
-            progress_bar.style.display = 'block';
+          let loading_bar = document.createElement('div'); //Creating outer element of progress bar
+          loading_bar.style.width = '60px';
+          loading_bar.style.height = '15px';
+          loading_bar.style.backgroundColor = 'rgb(200, 200, 200)';
+          loading_bar.style.marginTop = '4px';
+          loading_bar.style.borderRadius = '6px';
+          let progress_bar = document.createElement('span'); //Creating inner element of progress bar
+          progress_bar.classList.add('progressBar');
+          progress_bar.classList.add('progressBarStripes');
+          if(total_files != null){ //Null check to make sure code doesn't break
             progress_bar.style.width = ((completed_files/total_files)*60).toString() + 'px';
-            progress_bar.style.height = '15px';
-            progress_bar.style.borderRadius = '6px';
-            progress_bar.style.textAlign = 'center';
-            progress_bar.style.color = 'white';
-            progress_bar.style.fontSize = '12.5px';
             let progress = (completed_files/total_files)*100;
             progress_bar.innerHTML = progress.toString() + '%';
-            loading_bar.appendChild(progress_bar);
-            elem_4.appendChild(loading_bar);
-          } 
+          }else{
+            progress_bar.style.width = '24px';
+            progress_bar.innerHTML = 'NaN%';
+          }
+          loading_bar.appendChild(progress_bar);
+          elem_4.appendChild(loading_bar); 
         }
         row.appendChild(elem_4);
         elem_5 = document.createElement('td');
@@ -416,7 +363,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         elem_6.innerHTML = pageData.querySet[i].workers;
         row.appendChild(elem_6);
         elem_7 = document.createElement('td');;
-        if(pageData.querySet[i].needs_action){ //If status is 'submitted' or 'running', button is displayed to cancel the request (Work In Progress)
+        if(pageData.querySet[i].needs_action){ //If status is 'submitted' or 'running', button is displayed to cancel the request
           let btn = document.createElement('button');
           btn.setAttribute('id', 'cancelButton');
           btn.innerHTML = 'Cancel';
