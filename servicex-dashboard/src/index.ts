@@ -23,6 +23,8 @@ export default plugin;
 async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Activate function for plugin
   console.log('JupyterLab extension servicex-dashboard is activated!');
 
+  let loop: any = null;
+
   let state = { //indicates current page, number of rows, order, and number of buttons on bar for table
     'page': 1,
     'rows': 2,
@@ -99,82 +101,84 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     }
   }
 
-  async function createTable(){ //Function that creates instance of dashboard
+  async function createTable(SERVICEX_URL: string){ //Function that creates instance of dashboard
     //Code for retrieving live json result
+    /*
     const start = Date.now();
-    const response = await fetch('https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/servicex/transformation');
-    const data = await response.json(); //Getting json response for all requests
-    let requests = data.requests;
-    let arr_1 = [];
-    const urls = [];
-
-    for(var i = requests.length - 1; i > -1; i--){ //creating array containing objects for all of requests
-      const obj = {
-          request_id: '',
-          status: '',
-          title_link: '',
-          start_time: '',
-          start_time_seconds: 0,
-          finish_time: '',
-          files_completed: 0,
-          total_files: 0,
-          files_skipped: -1,
-          needs_action: false,
-          workers: '' 
-      };
-      let request_id = requests[i]['request_id'];
-      obj['request_id'] = request_id;
-      let status = requests[i]['status'];
-      obj['status'] = status;
-      obj['title_link'] = 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/' + request_id;
-
-      let workers = requests[i]['workers'];
-      if(status == 'Complete' || status == 'Canceled' || status == 'Fatal'){ //Depending on status, the number of workers/cancel button may show
-          obj['needs_action'] = false;
-          obj['workers'] = '-';
-      }else{
-          obj['needs_action'] = true;
-          obj['workers'] = workers.toString();
-      }
-
-      urls.push('https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/servicex/transformation/' + request_id + '/status'); //pushing urls of requests for later use
-      arr_1.push(obj); //pushing object for a single request into main array
+    let response;
+    try{
+      response = await fetch(SERVICEX_URL + 'servicex/transformation');
+    } catch(error){
+      alert('An error has occured: ' + error + '. This is most likely a CORS header issue with ' + SERVICEX_URL + '. Do cltr+shift+j to view the developer console for error specifics.');
+      return;
     }
+    let arr_1 = [];
+    if(response != null){
+      const data = await response.json(); //Getting json response for all requests
+      let requests = data.requests;
 
-    const promises = urls.map(url => fetch(url))
-    const getRequests = await Promise.all(promises);
-    const morePromises = getRequests.map(res => res.json());
-    const getResults = await Promise.all(morePromises); //Getting json responses from all requests' status API
+      for(var i = requests.length - 1; i > -1; i--){ //creating array containing objects for all of requests
+        const obj = {
+            request_id: '',
+            status: '',
+            title_link: '',
+            start_time: '',
+            start_time_seconds: 0,
+            finish_time: '',
+            files_completed: 0,
+            total_files: 0,
+            files_skipped: -1,
+            needs_action: false,
+            workers: '' 
+        };
+        let request_id = requests[i]['request_id']; //setting request_id, status, and titile link parameters 
+        obj['request_id'] = request_id;
+        let status = requests[i]['status'];
+        obj['status'] = status;
+        obj['title_link'] = SERVICEX_URL + 'transformation-request/' + request_id;
 
-    for(let i = 0; i < arr_1.length; i++){ //Adding onto request objects with newly recieved json responses
-      let start_time = getResults[i]['submit-time'];
-      start_time = start_time.slice(0,19);
-      const date = new Date(start_time);
-      const seconds = Math.floor(date.getTime() / 1000);
-      arr_1[i]['start_time_seconds'] = seconds;
-      start_time = start_time.replace("T", " ");
-      let finish_time = getResults[i]['finish-time'];
-      if(finish_time != null){
-          finish_time = finish_time.replace("T", " ");
-          finish_time = finish_time.slice(0, 19);
-      }else{
-          finish_time = '-';
+        let workers = requests[i]['workers'];
+        if(status == 'Complete' || status == 'Canceled' || status == 'Fatal'){ //Depending on status, the number of workers/cancel button may show
+            obj['needs_action'] = false;
+            obj['workers'] = '-';
+        }else{
+            obj['needs_action'] = true;
+            obj['workers'] = workers.toString();
+        }
+
+        let start_time = requests[i]['submit-time']; //Setting start time and finish time
+        start_time = start_time.slice(0,19);
+        const date = new Date(start_time);
+        const seconds = Math.floor(date.getTime() / 1000);
+        obj['start_time_seconds'] = seconds;
+        start_time = start_time.replace("T", " ");
+        let finish_time = requests[i]['finish-time'];
+        if(finish_time != null){
+            finish_time = finish_time.replace("T", " ");
+            finish_time = finish_time.slice(0, 19);
+        }else{
+            finish_time = '-';
+        }
+        obj['start_time'] = start_time;
+        obj['finish_time'] = finish_time;
+
+        let files_processed = requests[i]["files-processed"]; //setting parameters regarding files
+        let files_remaining = requests[i]["files-remaining"];
+        let files_skipped = requests[i]["files-skipped"];
+        let total_files;
+        if (files_remaining == null) {
+            total_files = null;
+        }else{
+            total_files = files_processed + files_skipped + files_remaining;
+        }
+        obj['files_completed'] = files_processed;
+        obj['total_files'] = total_files;
+        obj['files_skipped'] = files_skipped;
+
+        arr_1.push(obj); //pushing object for a single request into main array
       }
-      arr_1[i]['start_time'] = start_time;
-      arr_1[i]['finish_time'] = finish_time;
-
-      let files_processed = getResults[i]["files-processed"];
-      let files_remaining = getResults[i]["files-remaining"];
-      let files_skipped = getResults[i]["files-skipped"];
-      let total_files;
-      if (files_remaining == null) {
-          total_files = null;
-      }else{
-          total_files = files_processed + files_skipped + files_remaining;
-      }
-      arr_1[i]['files_completed'] = files_processed;
-      arr_1[i]['total_files'] = total_files;
-      arr_1[i]['files_skipped'] = files_skipped;
+    }else{
+      return;
     }
 
     let arr = quickSort(arr_1, 0, arr_1.length - 1); //Sorting array to be from latest to earliest
@@ -234,14 +238,128 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
           }
       }
       return arr;
-    }
-
-    if(content.node.hasChildNodes()){   //Checking if there is already an exisiting table
-      content.node.innerHTML = '';   //If it exists, it is removed
+    }*/
+    
+    let arr = [
+      {
+        request_id: 'e772add9-8163-45c0-ae8e-81fd5a2edb30',
+        status: 'Complete',
+        title_link: 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/e772add9-8163-45c0-ae8e-81fd5a2edb30',
+        start_time: '2022-08-04 18:28:49',
+        start_time_seconds: 1659655729,
+        finish_time: '2022-08-04 19:14:48',
+        files_completed: 1697,
+        total_files: 1697,
+        files_skipped: 0,
+        needs_action: false,
+        workers: '-'
+      },
+      {
+        request_id: 'ef57e235-ada0-4151-b82a-78d6851da431',
+        status: 'Complete',
+        title_link: 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/ef57e235-ada0-4151-b82a-78d6851da431',
+        start_time: '2022-07-26 09:24:50',
+        start_time_seconds: 1658845490,
+        finish_time: '2022-07-26 10:10:53',
+        files_completed: 1697,
+        total_files: 1697,
+        files_skipped: 0,
+        needs_action: false,
+        workers: '-'
+      },
+      {
+        request_id: '05cb9bf6-6fd8-477c-b9f6-d1352160cba9',
+        status: 'Complete',
+        title_link: 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/05cb9bf6-6fd8-477c-b9f6-d1352160cba9',
+        start_time: '2022-06-16 15:39:24',
+        start_time_seconds: 1655411964,
+        finish_time: '2022-06-16 16:35:54',
+        files_completed: 1697,
+        total_files: 1697,
+        files_skipped: 0,
+        needs_action: false,
+        workers: '-'
+      },
+      {
+        request_id: '6d7fb6c9-c64c-4614-98bd-fe62fde5fdcc',
+        status: 'Complete',
+        title_link: 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/6d7fb6c9-c64c-4614-98bd-fe62fde5fdcc',
+        start_time: '2022-04-23 13:28:49',
+        start_time_seconds: 1650738529,
+        finish_time: '2022-04-23 14:15:38',
+        files_completed: 1697,
+        total_files: 1697,
+        files_skipped: 0,
+        needs_action: false,
+        workers: '-'
+      },
+      {
+        request_id: '232ecf8a-b440-4002-a58f-1f28cd72ccca',
+        status: 'Complete',
+        title_link: 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/232ecf8a-b440-4002-a58f-1f28cd72ccca',
+        start_time: '2022-04-20 17:17:47',
+        start_time_seconds: 1650493067,
+        finish_time: '2022-04-20 18:03:27',
+        files_completed: 1697,
+        total_files: 1697,
+        files_skipped: 0,
+        needs_action: false,
+        workers: '-'
+      },
+      {
+        request_id: '3ad75289-7ef2-4ec4-95d3-c931aee41e45',
+        status: 'Complete',
+        title_link: 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/3ad75289-7ef2-4ec4-95d3-c931aee41e45',
+        start_time: '2022-04-20 10:28:58',
+        start_time_seconds: 1650468538,
+        finish_time: '2022-04-20 11:14:05',
+        files_completed: 1697,
+        total_files: 1697,
+        files_skipped: 0,
+        needs_action: false,
+        workers: '-'
+      },
+      {
+        request_id: 'aeef0b4f-4b15-4df9-af64-ec1f8449412d',
+        status: 'Complete',
+        title_link: 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/aeef0b4f-4b15-4df9-af64-ec1f8449412d',
+        start_time: '2022-04-19 16:52:01',
+        start_time_seconds: 1650405121,
+        finish_time: '2022-04-19 17:35:56',
+        files_completed: 1697,
+        total_files: 1697,
+        files_skipped: 0,
+        needs_action: false,
+        workers: '-'
+      },
+      {
+        request_id: '119201ab-f613-4363-bad3-1406af9f8daf',
+        status: 'Complete',
+        title_link: 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/119201ab-f613-4363-bad3-1406af9f8daf',
+        start_time: '2022-04-19 16:01:20',
+        start_time_seconds: 1650402080,
+        finish_time: '2022-04-19 16:56:06',
+        files_completed: 1697,
+        total_files: 1697,
+        files_skipped: 0,
+        needs_action: false,
+        workers: '-'
+      }
+    ];
+    
+    if(content.node.hasChildNodes() && content.node.childElementCount >= 2){   //Checking if there is already an exisiting table
+      let table_div = content.node.lastElementChild;
+      if(table_div != null){
+        content.node.removeChild(table_div);   //If it exists, it is removed
+      }
     }
 
     let table = document.createElement('table');  //Creating table and various table elements
     table.setAttribute('id', 'requestTable');
+    let caption = document.createElement('caption');
+    caption.innerHTML = 'Current instance: ' + SERVICEX_URL;
+    caption.style.marginBottom = '5px';
+    table.appendChild(caption);
     let thead = document.createElement('thead');
     let tbody = document.createElement('tbody');
     table.appendChild(thead);
@@ -257,8 +375,18 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     h4.setAttribute('id', 'header');
     h4.textContent = 'Transformation Requests';
 
+    let exit = document.createElement('button');
+    exit.setAttribute('id', 'exit');
+    exit.innerHTML = 'X';
+    exit.onclick = function(){
+      clearTimeout(loop);
+      content.node.removeChild(div);
+      return;
+    }
+
     let div_row = document.createElement('div'); //Creating div that contains page header
     div_row.appendChild(h4);
+    div_row.appendChild(exit);
     div.appendChild(div_row);
     div.appendChild(table);
     content.node.appendChild(div); //Appends newly created table to widget
@@ -323,9 +451,9 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
           if(total_files != null){ //Null check to make sure code doesn't break
             progress_bar.style.width = ((completed_files/total_files)*60).toString() + 'px';
             let progress = (completed_files/total_files)*100;
-            progress_bar.innerHTML = progress.toString() + '%';
+            progress_bar.innerHTML = progress.toFixed(0) + '%';
           }else{
-            progress_bar.style.width = '24px';
+            progress_bar.style.width = '40px';
             progress_bar.innerHTML = 'NaN%';
           }
           loading_bar.appendChild(progress_bar);
@@ -335,7 +463,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         elem_5 = document.createElement('td');
         let link_1 = document.createElement('a'); //Adding link to log of successful files
         link_1.style.fontWeight = 'normal';
-        link_1.setAttribute("href", 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/' + pageData.querySet[i].request_id + '/results?status=success');
+        link_1.setAttribute("href", SERVICEX_URL + 'transformation-request/' + pageData.querySet[i].request_id + '/results?status=success');
         let linkText1 = document.createTextNode(pageData.querySet[i].files_completed.toString());
         link_1.appendChild(linkText1);
         elem_5.appendChild(link_1);
@@ -351,7 +479,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
           elem_5.appendChild(text_1);
           let link_2 = document.createElement('a');
           link_2.style.fontWeight = 'normal';
-          link_2.setAttribute("href", 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/transformation-request/' + pageData.querySet[i].request_id + '/results?status=failure');
+          link_2.setAttribute("href", SERVICEX_URL + 'transformation-request/' + pageData.querySet[i].request_id + '/results?status=failure');
           let linkText2 = document.createTextNode(pageData.querySet[i].files_skipped.toString());
           link_2.appendChild(linkText2);
           elem_5.appendChild(link_2);
@@ -369,8 +497,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
           btn.innerHTML = 'Cancel';
           btn.type = 'button';
           btn.onclick = async function(){
-            fetch('https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/servicex/transformation/'+ pageData.querySet[i].request_id + '/cancel');
-            //createTable();
+            fetch(SERVICEX_URL + 'servicex/transformation/'+ pageData.querySet[i].request_id + '/cancel');
           }
           elem_7.append(btn);
         }
@@ -384,10 +511,10 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     pagination_div.style.justifyContent = 'center';
     pagination_div.style.padding = '10px';
 
-    createButtons(pageData, pagination_div);
+    createButtons(pageData, pagination_div); //call to create pagination buttons for widget
     div.appendChild(pagination_div);
-    
-    setTimeout(createTable, 1500); //Call for polling inside createTable()
+    console.log(SERVICEX_URL);
+    loop = setTimeout(createTable, 2500, SERVICEX_URL); //Call for polling inside createTable()
   }
 
   const content = new Widget(); //Creating widget and adding scrolling capabilites to it
@@ -396,8 +523,77 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
   widget.id = 'servicex-dashboard';
   widget.title.icon = 'servicex-logo';
   widget.title.closable = true;
- 
-  createTable();
+
+  /*
+  let input_div = document.createElement('div');
+  input_div.style.backgroundColor = 'white';
+  input_div.style.padding = '7.5px 15px';
+  input_div.style.margin = '0px';
+  input_div.style.width = '535px';
+  let header = document.createElement('h3');
+  header.innerHTML = 'Enter ServiceX Instance URL';
+  header.style.fontWeight = '500';
+  let input = document.createElement('input');
+  input.setAttribute('id', 'input');
+  input.setAttribute('value', 'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/');
+  input.style.width = '400px';
+  let input_button = document.createElement('button');
+  input_button.setAttribute('id', 'inputButton');
+  input_button.innerHTML = 'Go';
+  input_div.appendChild(header);
+  input_div.appendChild(input);
+  input_div.appendChild(input_button);
+  content.node.appendChild(input_div);
+  console.log('appended child');
+  input_button.onclick = function(){ //Initial call to create table for widget
+    createTable(input.value);
+  }*/
+
+  let instance_arr = [
+    'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/',
+    'https://uproot-atlas.servicex.af.uchicago.edu/',
+    'https://xaod.servicex.af.uchicago.edu/',
+    'https://opendataaf-servicex.servicex.coffea-opendata-dev.casa/'
+  ];
+  let dropdown_container_div = document.createElement('div');
+  dropdown_container_div.style.backgroundColor = 'white';
+  dropdown_container_div.style.padding = '7.5px 15px';
+  dropdown_container_div.style.margin = '0px';
+  dropdown_container_div.style.width = '535px';
+  dropdown_container_div.style.borderBottom = '0.5px solid gray';
+  let header = document.createElement('h3');
+  header.innerHTML = 'Select ServiceX Instance URL';
+  header.style.fontWeight = '500';
+  dropdown_container_div.appendChild(header);
+  let dropdown = document.createElement('div');
+  dropdown.classList.add('dropdown');
+  dropdown_container_div.appendChild(dropdown);
+  let dropdown_button = document.createElement('button');
+  dropdown_button.classList.add('dropdownButton');
+  dropdown_button.innerHTML = '▼     Select an instance';
+  let dropdown_div = document.createElement('div');
+  dropdown_div.setAttribute('id', 'dropdownDiv');
+  dropdown_div.classList.add('dropdownDiv');
+  for(let i = 0; i < 4; i++){
+    let link = document.createElement('a');
+    link.innerHTML = instance_arr[i];
+    link.onclick = function(){
+      clearTimeout(loop);
+      createTable(instance_arr[i]);
+    }
+    dropdown_div.appendChild(link);
+  }
+  dropdown.appendChild(dropdown_button);
+  dropdown.appendChild(dropdown_div);
+  dropdown_button.onclick = function(){
+    dropdown_div.classList.toggle('show');
+  }
+  window.onclick = function(event: any){
+    if(!event.target.matches('.dropdownButton')){
+      dropdown_div.classList.remove('show');
+    }
+  }
+  content.node.appendChild(dropdown_container_div);
 
   const command = 'dashboard: open'; //Command for opening dashboard through Command Line
   app.commands.addCommand(command, {
