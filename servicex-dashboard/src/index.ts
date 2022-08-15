@@ -23,7 +23,7 @@ export default plugin;
 async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Activate function for plugin
   console.log('JupyterLab extension servicex-dashboard is activated!');
 
-  let loop: any = null;
+  let loop: any = null; //variable to set/reset polling (this was a bit of a rushed change, probably should get reworked in the future)
 
   let state = { //indicates current page, number of rows, order, and number of buttons on bar for table
     'page': 1,
@@ -64,7 +64,6 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
       first.innerHTML = '<<';
       first.onclick = function(){ //Current page is set to 1 if button is clicked
         state.page = 1;
-        //createTable();
       }
       pagination_div.appendChild(first);
     }
@@ -84,7 +83,6 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
       }
       button.onclick = function(){ //Widget "reloads" when one of pagination buttons is clicked
         state.page = parseInt(button.innerHTML, 10);
-        //createTable();
       }
       pagination_div.appendChild(button);
     }
@@ -104,16 +102,16 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
   async function createTable(SERVICEX_URL: string){ //Function that creates instance of dashboard
     //Code for retrieving live json result
     /*
-    const start = Date.now();
+    const start = Date.now(); //For run time testing purposes
     let response;
-    try{
+    try{ //Testing to see if fetch request to current instance works
       response = await fetch(SERVICEX_URL + 'servicex/transformation');
-    } catch(error){
+    } catch(error){ //If not alert an error
       alert('An error has occured: ' + error + '. This is most likely a CORS header issue with ' + SERVICEX_URL + '. Do cltr+shift+j to view the developer console for error specifics.');
       return;
     }
-    let arr_1 = [];
-    if(response != null){
+    let arr_1 = []; //Overall array for unsorted data
+    if(response != null){ //If response is not null, proceed with the filling of arr_1. Else, exit.
       const data = await response.json(); //Getting json response for all requests
       let requests = data.requests;
 
@@ -183,7 +181,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
 
     let arr = quickSort(arr_1, 0, arr_1.length - 1); //Sorting array to be from latest to earliest
     console.log(arr);
-    const duration = (Date.now() - start) / 1000;
+    const duration = (Date.now() - start) / 1000; //For run time testing purposes
     console.log('API Call Runtime: ' + duration);
 
     function swap(arr: any[], left: number, right: number){ //Swap function for sorting
@@ -240,7 +238,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
       return arr;
     }*/
     
-    let arr = [
+    let arr = [  //For testing table functionality (until ServiceX issues are resolved)
       {
         request_id: 'e772add9-8163-45c0-ae8e-81fd5a2edb30',
         status: 'Complete',
@@ -375,7 +373,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     h4.setAttribute('id', 'header');
     h4.textContent = 'Transformation Requests';
 
-    let exit = document.createElement('button');
+    let exit = document.createElement('button'); //Creating exit button for dashboard
     exit.setAttribute('id', 'exit');
     exit.innerHTML = 'X';
     exit.onclick = function(){
@@ -524,7 +522,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
   widget.title.icon = 'servicex-logo';
   widget.title.closable = true;
 
-  /*
+  /* //code for alternate user input bar (might use if dropdown menu runs into issues)
   let input_div = document.createElement('div');
   input_div.style.backgroundColor = 'white';
   input_div.style.padding = '7.5px 15px';
@@ -549,46 +547,46 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     createTable(input.value);
   }*/
 
-  let instance_arr = [
+  let instance_arr = [ //list of all possible ServiceX instance urls
     'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/',
     'https://uproot-atlas.servicex.af.uchicago.edu/',
     'https://xaod.servicex.af.uchicago.edu/',
     'https://opendataaf-servicex.servicex.coffea-opendata-dev.casa/'
   ];
-  let dropdown_container_div = document.createElement('div');
+  let dropdown_container_div = document.createElement('div'); //creating container div for the entire dropdown section
   dropdown_container_div.style.backgroundColor = 'white';
   dropdown_container_div.style.padding = '7.5px 15px';
   dropdown_container_div.style.margin = '0px';
   dropdown_container_div.style.width = '535px';
   dropdown_container_div.style.borderBottom = '0.5px solid gray';
-  let header = document.createElement('h3');
+  let header = document.createElement('h3'); //Creating header above dropdown menu
   header.innerHTML = 'Select ServiceX Instance URL';
   header.style.fontWeight = '500';
   dropdown_container_div.appendChild(header);
-  let dropdown = document.createElement('div');
+  let dropdown = document.createElement('div'); //Creating div for the contents of the dropdown menu (initially hidden)
   dropdown.classList.add('dropdown');
   dropdown_container_div.appendChild(dropdown);
-  let dropdown_button = document.createElement('button');
+  let dropdown_button = document.createElement('button'); //Creating button for dropdown menu
   dropdown_button.classList.add('dropdownButton');
   dropdown_button.innerHTML = '▼     Select an instance';
-  let dropdown_div = document.createElement('div');
+  let dropdown_div = document.createElement('div'); //Creating div that houses the dropdown menu 
   dropdown_div.setAttribute('id', 'dropdownDiv');
   dropdown_div.classList.add('dropdownDiv');
-  for(let i = 0; i < 4; i++){
+  for(let i = 0; i < 4; i++){ //Adding links to dropdown menu
     let link = document.createElement('a');
-    link.innerHTML = instance_arr[i];
+    link.innerHTML = instance_arr[i]; //Set the current link text to the a ServiceX instance url
     link.onclick = function(){
-      clearTimeout(loop);
+      clearTimeout(loop); //When a link is clicked, reset the polling loop and start a new loop with the current ServiceX instance url
       createTable(instance_arr[i]);
     }
     dropdown_div.appendChild(link);
   }
   dropdown.appendChild(dropdown_button);
   dropdown.appendChild(dropdown_div);
-  dropdown_button.onclick = function(){
+  dropdown_button.onclick = function(){ //When dropdown button is clicked, toggle the dropdown's appearence
     dropdown_div.classList.toggle('show');
   }
-  window.onclick = function(event: any){
+  window.onclick = function(event: any){ //If anywhere besides the dropdown button is clicked, remove the contents of the dropdown menu from the screen
     if(!event.target.matches('.dropdownButton')){
       dropdown_div.classList.remove('show');
     }
