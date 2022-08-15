@@ -142,7 +142,6 @@ td{
 }
 
 @keyframes slide{
-<<<<<<< HEAD
    from {
     background-position: 15px,0
    }    
@@ -233,15 +232,3 @@ td{
     filter: grayscale(20%);
     cursor: pointer;
 }
-
-
-
-=======
-    from {
-        background-position: 15px, 0
-    }
-    to {
-        background-position: 0,0
-    }
-}
->>>>>>> e6d173fe1cd5bcae9ba525c8da54ab2e6bbc0644
