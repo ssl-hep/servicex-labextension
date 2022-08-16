@@ -27,8 +27,8 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
 
   let state = { //indicates current page, number of rows, order, and number of buttons on bar for table
     'page': 1,
-    'rows': 2,
-    'window': 3,
+    'rows': 7,
+    'window': 4,
     'desc': true,
   }
 
@@ -101,7 +101,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
 
   async function createTable(SERVICEX_URL: string){ //Function that creates instance of dashboard
     //Code for retrieving live json result
-    /*
+    
     const start = Date.now(); //For run time testing purposes
     let response;
     try{ //Testing to see if fetch request to current instance works
@@ -236,8 +236,8 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
           }
       }
       return arr;
-    }*/
-    
+    }
+    /*
     let arr = [  //For testing table functionality (until ServiceX issues are resolved)
       {
         request_id: 'e772add9-8163-45c0-ae8e-81fd5a2edb30',
@@ -343,7 +343,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
         needs_action: false,
         workers: '-'
       }
-    ];
+    ];*/
     
     if(content.node.hasChildNodes() && content.node.childElementCount >= 2){   //Checking if there is already an exisiting table
       let table_div = content.node.lastElementChild;
@@ -511,8 +511,8 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
 
     createButtons(pageData, pagination_div); //call to create pagination buttons for widget
     div.appendChild(pagination_div);
-    console.log(SERVICEX_URL);
-    loop = setTimeout(createTable, 2500, SERVICEX_URL); //Call for polling inside createTable()
+    //console.log(SERVICEX_URL);
+    loop = setTimeout(createTable, 5000, SERVICEX_URL); //Call for polling inside createTable()
   }
 
   const content = new Widget(); //Creating widget and adding scrolling capabilites to it
@@ -551,7 +551,8 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
     'https://opendataaf-servicex-aod.servicex.coffea-opendata-dev.casa/',
     'https://uproot-atlas.servicex.af.uchicago.edu/',
     'https://xaod.servicex.af.uchicago.edu/',
-    'https://opendataaf-servicex.servicex.coffea-opendata-dev.casa/'
+    'https://opendataaf-servicex.servicex.coffea-opendata-dev.casa/',
+    'https://opendataaf-servicex.servicex.coffea-opendata.casa/'
   ];
   let dropdown_container_div = document.createElement('div'); //creating container div for the entire dropdown section
   dropdown_container_div.style.backgroundColor = 'white';
@@ -572,7 +573,7 @@ async function activate(app: JupyterFrontEnd, palette: ICommandPalette) { //Acti
   let dropdown_div = document.createElement('div'); //Creating div that houses the dropdown menu 
   dropdown_div.setAttribute('id', 'dropdownDiv');
   dropdown_div.classList.add('dropdownDiv');
-  for(let i = 0; i < 4; i++){ //Adding links to dropdown menu
+  for(let i = 0; i < instance_arr.length; i++){ //Adding links to dropdown menu
     let link = document.createElement('a');
     link.innerHTML = instance_arr[i]; //Set the current link text to the a ServiceX instance url
     link.onclick = function(){

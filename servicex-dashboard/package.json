@@ -1,6 +1,6 @@
 {
   "name": "servicex-dashboard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Create a JupyterLab plugin that displays data from the ServiceX Dashboard",
   "keywords": [
     "jupyter",
